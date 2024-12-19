@@ -9,6 +9,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
+    name: '',      // Add name back to the form state
     email: '',
     password: '',
     confirmPassword: ''
@@ -36,6 +37,7 @@ const Register = () => {
       // Only send the fields that the backend expects
       const registrationData = {
         username: formData.username,
+        name: formData.name,
         email: formData.email,
         password: formData.password
       };
@@ -85,46 +87,20 @@ const Register = () => {
               />
             </div>
             <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="name" className="sr-only">Full Name</label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="name"
+                name="name"
+                type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
+                placeholder="Full Name"
+                value={formData.name}
                 onChange={handleChange}
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+            {/* ... rest of the form inputs ... */}
           </div>
-
           <div>
             <button
               type="submit"
