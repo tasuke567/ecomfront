@@ -9,7 +9,6 @@ const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: '',
-    name: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -34,17 +33,26 @@ const Register = () => {
 
     try {
       dispatch(authStart());
-      const response = await authService.register({
+      // Only send the fields that the backend expects
+      const registrationData = {
         username: formData.username,
-        name: formData.name,
         email: formData.email,
         password: formData.password
-      });
+      };
+
+      // Validation
+      if (!registrationData.username || !registrationData.email || !registrationData.password) {
+        setError('Please provide all required fields');
+        return;
+      }
+
+      const response = await authService.register(registrationData);
       dispatch(authSuccess(response));
       navigate('/login');
     } catch (error) {
       dispatch(authFailure(error.message));
-      setError(error.response?.data?.message || 'Registration failed');
+      const errorMessage = error.response?.data?.message || 'Registration failed';
+      setError(errorMessage);
     }
   };
 
@@ -73,19 +81,6 @@ const Register = () => {
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Username"
                 value={formData.username}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="name" className="sr-only">Full Name</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
-                value={formData.name}
                 onChange={handleChange}
               />
             </div>
