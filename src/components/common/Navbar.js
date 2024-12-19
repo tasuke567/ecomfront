@@ -36,25 +36,21 @@ const Navbar = () => {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart"
-              className="grid inline-flex items-center text-gray-600 hover:text-gray-800 "
-            >
+            <Link to="/cart" className="relative inline-flex items-center text-gray-600 hover:text-gray-800">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5" // ลดขนาดลงเป็น h-3 w-3 (12px)
+                className="h-5 w-5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.0" // ลด stroke ให้บางลงเพื่อให้เหมาะกับขนาดที่เล็กลง
+                strokeWidth="1.0"
               >
                 <path d="M9 20C9 21.1 8.1 22 7 22C5.9 22 5 21.1 5 20C5 18.9 5.9 18 7 18C8.1 18 9 18.9 9 20Z" />
                 <path d="M20 20C20 21.1 19.1 22 18 22C16.9 22 16 21.1 16 20C16 18.9 16.9 18 18 18C19.1 18 20 18.9 20 20Z" />
                 <path d="M3 3H5L5.4 5M7 13H17L21 5H5.4M7 13L5.4 5M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17" />
               </svg>
-
-              {/* ปรับ badge ให้เล็กลงตาม */}
               {cart.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w2.5 h2.5 text-[7px] flex items-center justify-center bg-gray-800 text-white rounded-full">
+                <span className="absolute -top-2 -right-2 w-4 h-4 text-xs flex items-center justify-center bg-gray-800 text-white rounded-full">
                   {cart.items.length}
                 </span>
               )}
