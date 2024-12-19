@@ -1,11 +1,20 @@
 // src/components/common/Navbar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../redux/auth/authSlice'; // Make sure to create this action
+
 
 const Navbar = () => {
   const auth = useSelector((state) => state.auth);
   const cart = useSelector((state) => state.cart || { items: [] });
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
@@ -53,14 +62,22 @@ const Navbar = () => {
 
             {/* User Menu */}
             {auth?.user ? (
-              <Link to="/profile" className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800">
-                <img
-                  src={auth.user.avatar || '/avatar-placeholder.png'}
-                  className="h-5 w-5 rounded-full object-cover"
-                  alt=""
-                />
-                <span className="text-sm">{auth.user.name}</span>
-              </Link>
+              <div className="flex items-center space-x-4">
+                <Link to="/profile" className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800">
+                  <img
+                    src={auth.user.avatar || '/avatar-placeholder.png'}
+                    className="h-5 w-5 rounded-full object-cover"
+                    alt=""
+                  />
+                  <span className="text-sm">{auth.user.email}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm px-3 py-1 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <Link to="/login"
                 className="text-sm px-3 py-1 text-gray-700 hover:text-gray-900"

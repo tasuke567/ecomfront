@@ -4,8 +4,11 @@ import { authService } from '../../services/authService';
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
-    token: localStorage.getItem('token'),
+    user: {
+      id: null,
+      email: null
+    },
+    isAuthenticated: false,
     loading: false,
     error: null
   },
@@ -15,9 +18,10 @@ const authSlice = createSlice({
       state.error = null;
     },
     authSuccess: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
       state.loading = false;
-      state.user = action.payload.user;
-      state.token = action.payload.token;
+      state.error = null;
     },
     authFailure: (state, action) => {
       state.loading = false;
@@ -25,8 +29,9 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.user = null;
-      state.token = null;
-      authService.logout();
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
     }
   }
 });
