@@ -11,7 +11,7 @@ const Login = () => {
 
   const location = useLocation();
   const { loading, error } = useSelector((state) => state.auth);
-
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,6 +26,7 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear any previous errors
     try {
       dispatch(authStart());
       const response = await authService.login(formData);
@@ -36,7 +37,7 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       dispatch(authFailure(error.message));
-      setError(error.message);
+      setError(error.response?.data?.message || 'Login failed');
     }
   };
 
