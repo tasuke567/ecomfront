@@ -1,13 +1,15 @@
 // src/pages/Login.js
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const location = useLocation();
   const { loading, error } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -24,14 +26,17 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
       dispatch(authStart());
-      const data = await authService.login(formData);
-      dispatch(authSuccess(data));
-      navigate('/');
+      const response = await authService.login(formData);
+      dispatch(authSuccess(response.user));
+      
+      // Redirect to the page user tried to visit or default to home
+      const from = location.state?.from || '/';
+      navigate(from, { replace: true });
     } catch (error) {
       dispatch(authFailure(error.message));
+      setError(error.message);
     }
   };
 
@@ -87,7 +92,7 @@ const Login = () => {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-          
+
           <div className="text-sm text-center">
             <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Don't have an account? Register
