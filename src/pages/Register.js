@@ -37,7 +37,6 @@ const Register = () => {
       // Only send the fields that the backend expects
       const registrationData = {
         username: formData.username,
-        name: formData.name, 
         email: formData.email,
         password: formData.password
       };
