@@ -41,7 +41,7 @@ const Navbar = () => {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-3 w-3" // ลดขนาดลงเป็น h-3 w-3 (12px)
+                className="h-5 w-5" // ลดขนาดลงเป็น h-3 w-3 (12px)
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -54,7 +54,7 @@ const Navbar = () => {
 
               {/* ปรับ badge ให้เล็กลงตาม */}
               {cart.items.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 text-[7px] flex items-center justify-center bg-gray-800 text-white rounded-full">
+                <span className="absolute -top-1 -right-1 w2.5 h2.5 text-[7px] flex items-center justify-center bg-gray-800 text-white rounded-full">
                   {cart.items.length}
                 </span>
               )}
