@@ -1,6 +1,6 @@
 // src/components/common/Navbar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../redux/auth/authSlice'; // Make sure to create this action
 
