@@ -9,7 +9,7 @@ const Register = () => {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
