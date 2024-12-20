@@ -39,7 +39,7 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (error) {
       dispatch(authFailure(error.message));
-      setLoginError(error.response?.data?.message || 'Login failed');
+      setError(error.response?.data?.message || 'Login failed');
     }
   };
   const { loginWithRedirect: facebookLogin } = useAuth0();
@@ -70,9 +70,9 @@ const Login = () => {
         </div>
          {/* Regular login form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {authError && (
+          {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-              {authError}
+              {error}
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
