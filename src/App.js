@@ -23,7 +23,7 @@ function App() {
       clientId="YOUR_AUTH0_CLIENT_ID"
       redirectUri={window.location.origin}
     >
-      <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+      <GoogleOAuthProvider clientId="{process.env.REACT_APP_GOOGLE_CLIENT_ID}">
         <BrowserRouter>
           <Navbar />
           <Routes>
