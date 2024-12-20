@@ -1,5 +1,5 @@
 // src/pages/Login.js
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
@@ -43,17 +43,16 @@ const Login = () => {
   };
 
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = useCallback(async (credentialResponse) => {
     try {
       dispatch(authStart());
       console.log('Google login attempt with:', credentialResponse);
-
-      // ส่งเฉพาะ credential ไปที่ backend
-      const response = await authService.googleLogin(credentialResponse.credential);
-
-      // ตรวจสอบ response
-      console.log('Backend response:', response);
-
+      
+      if (!credentialResponse.credential) {
+        throw new Error('No credential received');
+      }
+       const response = await authService.googleLogin(credentialResponse.credential);
+      
       if (response && response.user) {
         dispatch(authSuccess(response.user));
         navigate(location.state?.from || '/');
@@ -65,11 +64,11 @@ const Login = () => {
       dispatch(authFailure(error.message));
       setLoginError('Failed to login with Google. Please try again.');
     }
-  };
-  const handleGoogleError = (error) => {
-    console.error('Google login failed:', error);
-    setLoginError('Google login failed. Please try again.');
-  };
+  }, [dispatch, navigate, location.state]);
+  const handleGoogleError = useCallback((error) => {
+   console.error('Google login failed:', error);
+   setLoginError('Google login failed. Please try again.');
+ }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
