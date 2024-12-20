@@ -34,9 +34,8 @@ export const authService = {
 
       if (response.data) {
         // จัดการ token ถ้ามี
-        if (response.data.token) {
+        if (response.data?.token) {
           localStorage.setItem('token', response.data.token);
-          api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
         }
         return response.data;
       }

@@ -4,33 +4,26 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
 // Add token to requests
 api.interceptors.request.use(
   (config) => {
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers,
-      baseURL: config.baseURL
-    });
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    // Log request details for debugging
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers
-    });
-    return config;
-  },
+    // Log request details
+   console.log('API Request:', {
+    url: `${config.baseURL}${config.url}`,
+    method: config.method,
+    data: config.data
+  });
+   const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+},
   (error) => {
     console.error('Request interceptor error:', error);
     return Promise.reject(error);
