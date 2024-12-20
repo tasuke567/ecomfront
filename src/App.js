@@ -16,7 +16,6 @@ import { Auth0Provider } from '@auth0/auth0-react';
 
 
 function App() {
-  const { token } = useSelector((state) => state.auth);
 
   return (
     <Auth0Provider

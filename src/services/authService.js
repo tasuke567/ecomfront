@@ -24,12 +24,12 @@ export const authService = {
     delete api.defaults.headers.common['Authorization'];
   },
   async googleLogin(credential) {
-    const response = await axios.post('/api/auth/google', { credential });
+    const response = await api.post('/api/auth/google', { credential });
     return response.data;
   },
 
   async facebookLogin(accessToken) {
-    const response = await axios.post('/api/auth/facebook', { accessToken });
+    const response = await api.post('/api/auth/facebook', { accessToken });
     return response.data;
   }
 
