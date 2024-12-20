@@ -28,7 +28,7 @@ export const authService = {
       if (!credential) {
         throw new Error('No credential provided');
       }
-      const response = await api.post('/auth/google', {
+      const response = await api.post('/google', {
         credential: credential,
       });
 
