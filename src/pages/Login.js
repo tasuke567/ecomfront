@@ -10,10 +10,9 @@ import { useAuth0 } from '@auth0/auth0-react';
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const location = useLocation();
-  const { loading, error: authError } = useSelector((state) => state.auth);
   const [loginError, setLoginError] = useState('');
+  const { loading, error: authError } = useSelector((state) => state.auth);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,29 +43,31 @@ const Login = () => {
   };
 
 
-  const handleGoogleSuccess = async (response) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
-      console.log('Google Sign In success:', response);
-      const result = await GoogleLogin(response);
-      console.log('Server response:', result);
+      dispatch(authStart());
+      console.log('Google login attempt with:', credentialResponse);
+
+      // ส่งเฉพาะ credential ไปที่ backend
+      const response = await authService.googleLogin(credentialResponse.credential);
+
+      // ตรวจสอบ response
+      console.log('Backend response:', response);
+
+      if (response && response.user) {
+        dispatch(authSuccess(response.user));
+        navigate(location.state?.from || '/');
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Google login error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response,
-        stack: error.stack
-      });
       dispatch(authFailure(error.message));
-      setLoginError(error.response?.data?.message || 'Google login failed');
+      setLoginError('Failed to login with Google. Please try again.');
     }
   };
   const handleGoogleError = (error) => {
-    console.error('Google login error:', error);
-    console.error('Error details:', {
-      error,
-      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID?.substring(0, 10) + '...',
-      origin: window.location.origin
-    });
+    console.error('Google login failed:', error);
     setLoginError('Google login failed. Please try again.');
   };
 
@@ -141,25 +142,27 @@ const Login = () => {
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">
                 Or continue with
-              </span>
+             </span>
             </div>
           </div>
-
           <div className="mt-6">
-            <div>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                useOneTap={false}
-                type="standard"
-                theme="filled_blue"
-                size="large"
-                text="signin_with"
-                shape="rectangular"
-                width="250"
-              />
-            </div>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              type="standard"
+              theme="filled_blue"
+              size="large"
+              text="signin_with"
+              shape="rectangular"
+              width="250"
+            />
           </div>
+          {loginError && (
+            <div className="mt-2 text-red-600 text-sm text-center">
+              {loginError}
+            </div>
+          )}
         </div>
       </div>
     </div>

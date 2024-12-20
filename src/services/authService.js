@@ -23,28 +23,23 @@ export const authService = {
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
   },
-  async googleLogin(tokenId) {
+  async googleLogin(credential) {
     try {
-      console.log('Google response:', response);
-      const response = await api.post('/auth/google',
-      {
-        credential: response.credential  // ส่ง credential แทน token
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      console.log('Starting Google login process');
+      console.log('Request body:', { token: credential });
+      
+      const response = await api.post('/auth/google', { 
+        token: credential 
       });
-      this.setSession(response.data); // เพิ่มบรรทัดนี้เพื่อจัดการ token
+      
+      if (response.data) {
+        this.setSession(response.data);
+      }
+      
       return response.data;
     } catch (error) {
-      console.error('Google login error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      console.error('Google login error in service:', error);
       throw error;
     }
-  }
 
 };
