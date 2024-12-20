@@ -23,14 +23,15 @@ export const authService = {
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
   },
-  async googleLogin(credential) {
-    const response = await api.post('/api/auth/google', { credential });
-    return response.data;
-  },
-
-  async facebookLogin(accessToken) {
-    const response = await api.post('/api/auth/facebook', { accessToken });
-    return response.data;
+  async googleLogin(tokenId) {
+    try {
+      const response = await api.post('/auth/google', { token: tokenId });
+      this.setSession(response.data); // เพิ่มบรรทัดนี้เพื่อจัดการ token
+      return response.data;
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
   }
 
 };
