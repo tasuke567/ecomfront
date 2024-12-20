@@ -28,14 +28,19 @@ export const authService = {
       if (!credential) {
         throw new Error('No credential provided');
       }
-      const response = await api.post('/auth/google', {
+      const response = await api.post('/api/auth/google', {
         credential: credential,
       });
 
-      if (response.data?.token) {
-        api.setToken(response.data.token);
+      if (response.data) {
+        // จัดการ token ถ้ามี
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          api.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        }
+        return response.data;
       }
-      return response.data;
+       throw new Error('Invalid response from server');
 
     } catch (error) {
       console.error('Google login error details:', {

@@ -46,12 +46,13 @@ const Login = () => {
   const handleGoogleSuccess = useCallback(async (credentialResponse) => {
     try {
       dispatch(authStart());
-      console.log('Google login attempt with:', credentialResponse);
+      console.log('Google login attempt with credential:', credentialResponse);
 
       if (!credentialResponse.credential) {
         throw new Error('No credential received from Google');
       }
       const response = await authService.googleLogin(credentialResponse.credential);
+      console.log('Login response:', response);
 
       if (response && response.user) {
         dispatch(authSuccess(response.user));
@@ -61,15 +62,15 @@ const Login = () => {
         throw new Error('Invalid response from server');
       }
     } catch (error) {
-      console.error('Google login error details:', {
+      console.error('Google login error:', {
         message: error.message,
         response: error.response?.data,
         status: error.response?.status
       });
-      
+
       dispatch(authFailure(error.message));
       setLoginError(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         'Failed to login with Google. Please try again.'
       );
     }
