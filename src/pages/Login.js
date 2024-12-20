@@ -138,6 +138,7 @@ const Login = () => {
           <div className="mt-6 grid grid-cols-2 gap-3">
             <div>
               <GoogleLogin
+                 clientId={rocess.env.REACT_APP_GOOGLE_CLIENT_ID}
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
                 useOneTap
