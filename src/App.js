@@ -12,39 +12,37 @@ import Cart from './pages/Cart';
 import PrivateRoute from './components/common/PrivateRoute';
 import { useSelector } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { Auth0Provider } from '@auth0/auth0-react';
+
 
 
 function App() {
-
+  console.log('Google Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
   return (
-    <Auth0Provider
-      domain="YOUR_AUTH0_DOMAIN"
-      clientId="YOUR_AUTH0_CLIENT_ID"
-      redirectUri={window.location.origin}
-    >
-      <GoogleOAuthProvider clientId="{process.env.REACT_APP_GOOGLE_CLIENT_ID}">
-        <BrowserRouter>
-          <Navbar />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
 
-            {/* Protected Routes */}
-            <Route element={<PrivateRoute />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/cart" element={<Cart />} />
-            </Route>
-          </Routes>
-          <Footer />
-        </BrowserRouter>
-      </GoogleOAuthProvider>
-    </Auth0Provider>
+    <GoogleOAuthProvider
+      clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
+      onScriptLoadError={(error) => console.error('Google Script Load Error:', error)}
+      onScriptLoadSuccess={() => console.log('Google Script Loaded Successfully')}>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/cart" element={<Cart />} />
+          </Route>
+        </Routes>
+        <Footer />
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

@@ -33,7 +33,7 @@ const Login = () => {
       dispatch(authStart());
       const response = await authService.login(formData);
       dispatch(authSuccess(response.user));
-      
+
       // Redirect to the page user tried to visit or default to home
       const from = location.state?.from || '/';
       navigate(from, { replace: true });
@@ -42,22 +42,35 @@ const Login = () => {
       loginError(error.response?.data?.message || 'Login failed');
     }
   };
-  const { loginWithRedirect: facebookLogin } = useAuth0();
+  const { loginWithRedirect } = useAuth0();
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
+      console.log('Google login attempt with credential:', credentialResponse);
       dispatch(authStart());
       const response = await authService.googleLogin(credentialResponse.credential);
+      console.log('Google login response:', response);
       dispatch(authSuccess(response.user));
       navigate(location.state?.from || '/');
     } catch (error) {
+      console.error('Google login error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response,
+        stack: error.stack
+      });
       dispatch(authFailure(error.message));
       setLoginError(error.response?.data?.message || 'Google login failed');
     }
   };
-
-  const handleGoogleError = () => {
-    setLoginError('Google login failed');
+  const handleGoogleError = (error) => {
+    console.error('Google login error:', error);
+    console.error('Error details:', {
+      error,
+      clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID?.substring(0, 10) + '...',
+      origin: window.location.origin
+    });
+    setLoginError('Google login failed. Please try again.');
   };
 
   return (
@@ -68,7 +81,7 @@ const Login = () => {
             Sign in to your account
           </h2>
         </div>
-         {/* Regular login form */}
+        {/* Regular login form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {authError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
@@ -135,27 +148,20 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6">
             <div>
               <GoogleLogin
-                 clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                 onSuccess={handleGoogleSuccess}
                 onError={handleGoogleError}
-                useOneTap
-                className="w-full"
+                useOneTap={false}
+                type="standard"
+                theme="filled_blue"
+                size="large"
+                text="signin_with"
+                shape="rectangular"
+                width="250"
               />
             </div>
-            
-            <button
-              type="button"
-              onClick={() => facebookLogin()}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <svg className="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-              </svg>
-              Facebook
-            </button>
           </div>
         </div>
       </div>
