@@ -22,5 +22,15 @@ export const authService = {
   logout() {
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
+  },
+  async googleLogin(credential) {
+    const response = await axios.post('/api/auth/google', { credential });
+    return response.data;
+  },
+
+  async facebookLogin(accessToken) {
+    const response = await axios.post('/api/auth/facebook', { accessToken });
+    return response.data;
   }
+
 };
