@@ -25,21 +25,31 @@ export const authService = {
   },
   async googleLogin(credential) {
     try {
-      console.log('Starting Google login process');
-      console.log('Request body:', { token: credential });
-      
-      const response = await api.post('/auth/google', { 
-        token: credential 
-      });
-      
-      if (response.data) {
-        this.setSession(response.data);
+      if (!credential) {
+        throw new Error('No credential provided');
       }
-      
+      const response = await api.post('/auth/google', {
+        credential: credential,
+      });
+
+      if (response.data?.token) {
+        api.setToken(response.data.token);
+      }
       return response.data;
+
     } catch (error) {
-      console.error('Google login error in service:', error);
+      console.error('Google login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw error;
     }
-
-}};
+  },
+  logout() {
+    api.clearToken();
+  },
+  isAuthenticated() {
+    return !!localStorage.getItem('token');
+  }
+};

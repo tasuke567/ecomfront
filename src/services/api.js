@@ -15,11 +15,64 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Log request details for debugging
+    console.log('API Request:', {
+      url: config.url,
+      method: config.method,
+      data: config.data,
+      headers: config.headers
+    });
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
 
+// Response interceptor
+api.interceptors.response.use(
+  (response) => {
+    // Log successful response
+    console.log('API Response:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
+  (error) => {
+    // Log error response
+    console.error('API Error:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.message,
+      data: error.response?.data
+    });
+    // Handle specific error cases
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    if (error.response?.status === 400) {
+      // Add more context to bad request errors
+      error.message = error.response.data.message || 'Invalid request data';
+    }
+    return Promise.reject(error);
+  }
+);
+// Add helper methods
+api.setToken = (token) => {
+  if (token) {
+    localStorage.setItem('token', token);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
+  ;
+  api.clearToken = () => {
+    localStorage.removeItem('token');
+    delete api.defaults.headers.common['Authorization'];
+    ;
+  }
+}
 export default api;

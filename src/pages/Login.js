@@ -47,28 +47,37 @@ const Login = () => {
     try {
       dispatch(authStart());
       console.log('Google login attempt with:', credentialResponse);
-      
+
       if (!credentialResponse.credential) {
-        throw new Error('No credential received');
+        throw new Error('No credential received from Google');
       }
-       const response = await authService.googleLogin(credentialResponse.credential);
-      
+      const response = await authService.googleLogin(credentialResponse.credential);
+
       if (response && response.user) {
         dispatch(authSuccess(response.user));
         navigate(location.state?.from || '/');
       } else {
+        console.error('Invalid response structure:', response);
         throw new Error('Invalid response from server');
       }
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error('Google login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
       dispatch(authFailure(error.message));
-      setLoginError('Failed to login with Google. Please try again.');
+      setLoginError(
+        error.response?.data?.message || 
+        'Failed to login with Google. Please try again.'
+      );
     }
   }, [dispatch, navigate, location.state]);
   const handleGoogleError = useCallback((error) => {
-   console.error('Google login failed:', error);
-   setLoginError('Google login failed. Please try again.');
- }, []);
+    console.error('Google login failed:', error);
+    setLoginError('Google login failed. Please try again.');
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
