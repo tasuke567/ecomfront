@@ -42,16 +42,13 @@ const Login = () => {
       loginError(error.response?.data?.message || 'Login failed');
     }
   };
-  const { loginWithRedirect } = useAuth0();
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+
+  const handleGoogleSuccess = async (response) => {
     try {
-      console.log('Google login attempt with credential:', credentialResponse);
-      dispatch(authStart());
-      const response = await authService.googleLogin(credentialResponse.credential);
-      console.log('Google login response:', response);
-      dispatch(authSuccess(response.user));
-      navigate(location.state?.from || '/');
+      console.log('Google Sign In success:', response);
+      const result = await GoogleLogin(response);
+      console.log('Server response:', result);
     } catch (error) {
       console.error('Google login error:', error);
       console.error('Error details:', {

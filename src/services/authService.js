@@ -25,12 +25,24 @@ export const authService = {
   },
   async googleLogin(tokenId) {
     try {
-      console.log('Sending Google token:', tokenId);
-      const response = await api.post('/auth/google', { token: tokenId });
+      console.log('Google response:', response);
+      const response = await api.post('/auth/google',
+      {
+        credential: response.credential  // ส่ง credential แทน token
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       this.setSession(response.data); // เพิ่มบรรทัดนี้เพื่อจัดการ token
       return response.data;
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error('Google login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       throw error;
     }
   }
