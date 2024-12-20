@@ -19,9 +19,7 @@ function App() {
   return (
 
     <GoogleOAuthProvider
-      clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
-      onScriptLoadError={(error) => console.error('Google Script Load Error:', error)}
-      onScriptLoadSuccess={() => console.log('Google Script Loaded Successfully')}>
+      clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <Navbar />
         <Routes>
