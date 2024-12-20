@@ -25,6 +25,7 @@ export const authService = {
   },
   async googleLogin(tokenId) {
     try {
+      console.log('Sending Google token:', tokenId);
       const response = await api.post('/auth/google', { token: tokenId });
       this.setSession(response.data); // เพิ่มบรรทัดนี้เพื่อจัดการ token
       return response.data;
