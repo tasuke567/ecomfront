@@ -14,6 +14,18 @@ const Shop = () => {
     sort: 'newest'
   });
 
+  useEffect(() => {
+    document.title = "Shop | Your Store Name";
+    const metaDesc = document.createElement('meta');
+    metaDesc.name = "description";
+    metaDesc.content = "Browse our collection of products with great deals and fast shipping";
+    document.head.appendChild(metaDesc);
+
+    return () => {
+      document.head.removeChild(metaDesc);
+    };
+  }, []);
+
   // จำลองข้อมูลสินค้า
   const products = [
     {
@@ -62,7 +74,7 @@ const Shop = () => {
     // Price range filter
     if (filters.priceRange !== 'all') {
       const [min, max] = filters.priceRange.split('-').map(Number);
-      result = result.filter(product => 
+      result = result.filter(product =>
         product.price >= min && (max ? product.price <= max : true)
       );
     }
@@ -99,7 +111,7 @@ const Shop = () => {
           <select
             className="px-4 py-2 border rounded-lg"
             value={filters.category}
-            onChange={(e) => setFilters({...filters, category: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, category: e.target.value })}
           >
             <option value="all">All Categories</option>
             <option value="Electronics">Electronics</option>
@@ -111,7 +123,7 @@ const Shop = () => {
           <select
             className="px-4 py-2 border rounded-lg"
             value={filters.priceRange}
-            onChange={(e) => setFilters({...filters, priceRange: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
           >
             <option value="all">All Prices</option>
             <option value="0-100">Under $100</option>
@@ -124,7 +136,7 @@ const Shop = () => {
           <select
             className="px-4 py-2 border rounded-lg"
             value={filters.sort}
-            onChange={(e) => setFilters({...filters, sort: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
           >
             <option value="newest">Newest</option>
             <option value="price-low">Price: Low to High</option>
@@ -133,19 +145,19 @@ const Shop = () => {
         </div>
       </div>
 
-      
+
       {/* Results Summary */}
       <div className="flex justify-between items-center mb-6">
         <p className="text-gray-600">
           {filteredProducts.length} products found
           {searchTerm && ` for "${searchTerm}"`}
         </p>
-        
+
         {/* Sort Options */}
         <select
           className="border rounded-lg px-3 py-1.5"
           value={filters.sort}
-          onChange={(e) => setFilters({...filters, sort: e.target.value})}
+          onChange={(e) => setFilters({ ...filters, sort: e.target.value })}
         >
           <option value="newest">Newest</option>
           <option value="price-low">Price: Low to High</option>

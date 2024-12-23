@@ -47,7 +47,7 @@ const ProductDetail = () => {
         <div className="space-y-6">
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
           <p className="text-xl font-bold text-blue-600">${product.price}</p>
-          
+
           <div className="prose prose-sm text-gray-500">
             <p>{product.description}</p>
           </div>
@@ -64,6 +64,7 @@ const ProductDetail = () => {
           <div className="flex items-center space-x-4">
             <div className="flex items-center border rounded-md">
               <button
+                aria-label="Decrease quantity"
                 className="px-4 py-2 text-gray-600 hover:text-gray-900"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
               >
@@ -71,6 +72,7 @@ const ProductDetail = () => {
               </button>
               <span className="px-4 py-2 border-x">{quantity}</span>
               <button
+                aria-label="Increase quantity"
                 className="px-4 py-2 text-gray-600 hover:text-gray-900"
                 onClick={() => setQuantity(quantity + 1)}
               >
