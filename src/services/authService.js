@@ -2,7 +2,7 @@ import api from './api';
 
 export const authService = {
 
-  export const register = async (userData) => {
+  register: async (userData) => {
     try {
       console.log('Sending registration data:', userData);
   
@@ -10,8 +10,8 @@ export const authService = {
         throw new Error('Username is required');
       }
   
-      const response = await axios.post(
-        'https://ecomback-843x.onrender.com/auth/register',
+      const response = await api.post(
+        '/auth/register',
         {
           username: userData.username.trim(),  // เปลี่ยนจาก name เป็น username
           email: userData.email.toLowerCase().trim(),
@@ -29,7 +29,7 @@ export const authService = {
       console.error('Registration error:', error.response?.data || error);
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
-  };,
+  },
 
   login: async (credentials) => {
     try {
