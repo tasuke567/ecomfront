@@ -1,5 +1,5 @@
 // src/pages/ProductDetail.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cart/cartSlice';
@@ -7,20 +7,21 @@ import { addToCart } from '../redux/cart/cartSlice';
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = useState(1);
 
   // สมมติข้อมูลสินค้า (ในอนาคตจะดึงจาก API)
   const product = {
     id: 1,
-    name: "Premium Headphones",
-    price: 199.99,
+    name: "Wireless Headphones",
+    price: 99.99,
     description: "High-quality wireless headphones with noise cancellation",
     images: ["/api/placeholder/600/400"],
-    specs: {
-      brand: "AudioTech",
-      color: "Black",
-      warranty: "1 Year"
-    }
+    features: [
+      "Bluetooth 5.0",
+      "Active Noise Cancellation",
+      "30-hour battery life",
+      "Premium sound quality"
+    ]
   };
 
   const handleAddToCart = () => {
@@ -34,58 +35,54 @@ const ProductDetail = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Product Images */}
-        <div className="space-y-4">
-          <img 
-            src={product.images[0]} 
+        <div>
+          <img
+            src={product.images[0]}
             alt={product.name}
-            className="w-full rounded-lg shadow-md"
+            className="w-full rounded-lg"
           />
         </div>
 
         {/* Product Info */}
         <div className="space-y-6">
           <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-          <p className="text-2xl font-bold text-blue-600">${product.price}</p>
+          <p className="text-xl font-bold text-blue-600">${product.price}</p>
           
-          <div className="prose prose-sm text-gray-600">
+          <div className="prose prose-sm text-gray-500">
             <p>{product.description}</p>
           </div>
 
-          {/* Quantity Selector */}
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">Quantity:</span>
-            <div className="flex items-center border rounded">
-              <button 
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-4 py-2 border-r"
-              >-</button>
-              <span className="px-4">{quantity}</span>
-              <button 
-                onClick={() => setQuantity(quantity + 1)}
-                className="px-4 py-2 border-l"
-              >+</button>
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900">Features</h3>
+            <ul className="list-disc list-inside space-y-2">
+              {product.features.map((feature, index) => (
+                <li key={index} className="text-gray-500">{feature}</li>
+              ))}
+            </ul>
           </div>
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Add to Cart
-          </button>
-
-          {/* Specifications */}
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Specifications</h3>
-            <dl className="grid grid-cols-1 gap-4">
-              {Object.entries(product.specs).map(([key, value]) => (
-                <div key={key} className="flex">
-                  <dt className="w-1/3 text-gray-600">{key}:</dt>
-                  <dd className="w-2/3 font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center border rounded-md">
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              >
+                -
+              </button>
+              <span className="px-4 py-2 border-x">{quantity}</span>
+              <button
+                className="px-4 py-2 text-gray-600 hover:text-gray-900"
+                onClick={() => setQuantity(quantity + 1)}
+              >
+                +
+              </button>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              className="flex-1 bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Add to Cart
+            </button>
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import Checkout from './pages/Checkout';
 import Cart from './pages/Cart';
+import ProductDetail from './pages/ProductDetail'
 import PrivateRoute from './components/common/PrivateRoute';
 import { useSelector } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
           </Route>
         </Routes>
           <Footer />
