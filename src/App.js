@@ -1,23 +1,32 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/common/Navbar';
-import Footer from './components/common/Footer';
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Profile from './pages/Profile';
 import Orders from './pages/Orders';
-import Checkout from './pages/Checkout';
-import Cart from './pages/Cart';
 import ProductDetail from './pages/ProductDetail'
 import PrivateRoute from './components/common/PrivateRoute';
-import { useSelector } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
-import { checkAuthStatus } from '../redux/auth/authSlice';
+
+
+import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { authSuccess } from './redux/auth/authSlice';
+// แก้ไข path การ import
+import { authService } from './services/authService';
+import { authSuccess } from './redux/auth/authSlice'; // แก้ไขจาก ../redux เป็น ./redux
+
+// Components
+
+import Footer from './components/common/Footer';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+// Pages
+import Home from './pages/Home';
+import Shop from './pages/Shop';
+import Product from './pages/Product';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 
 function App() {
