@@ -10,14 +10,30 @@ const ProfileInfo = () => {
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
 
-  const [avatar, setAvatar] = useState(user.picture || '/default-avatar.png');
-
+  const [previewImage, setPreviewImage] = useState(user?.picture || '/default-avatar.png');
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    phone: user.phone || '',
-    bio: user.bio || ''
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    bio: user?.bio || '',
+    avatar: null
   });
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+        setFormData(prev => ({ ...prev, avatar: file }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,32 +60,37 @@ const ProfileInfo = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Avatar */}
-        <div className="space-y-2">
-            <GoogleConnect />
-            {/* หรือเพิ่มปุ่มอัพโหลดรูปเอง */}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setAvatar(reader.result);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-              className="hidden"
-              id="avatar-upload"
-            />
-            <label
-              htmlFor="avatar-upload"
-              className="cursor-pointer text-blue-600 hover:text-blue-700 text-sm"
+        <div className="flex items-center space-x-4 mb-6">
+        <div className="relative">
+          <img
+            src={previewImage}
+            alt="Profile"
+            className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = '/default-avatar.png';
+            }}
+          />
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute bottom-0 right-0 bg-blue-600 text-white p-1 rounded-full hover:bg-blue-700"
             >
-              Upload Custom Photo
-            </label>
-          </div>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+        />
+      </div>
 
         {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,7 +100,7 @@ const ProfileInfo = () => {
               type="text"
               name="name"
               value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
               disabled={!isEditing}
               className="w-full p-2 border rounded"
             />
@@ -91,7 +112,7 @@ const ProfileInfo = () => {
               type="email"
               name="email"
               value={formData.email}
-              onChange={e => setFormData({...formData, email: e.target.value})}
+              onChange={e => setFormData({ ...formData, email: e.target.value })}
               disabled={!isEditing}
               className="w-full p-2 border rounded"
             />
@@ -103,7 +124,7 @@ const ProfileInfo = () => {
               type="tel"
               name="phone"
               value={formData.phone}
-              onChange={e => setFormData({...formData, phone: e.target.value})}
+              onChange={e => setFormData({ ...formData, phone: e.target.value })}
               disabled={!isEditing}
               className="w-full p-2 border rounded"
             />
@@ -115,7 +136,7 @@ const ProfileInfo = () => {
           <textarea
             name="bio"
             value={formData.bio}
-            onChange={e => setFormData({...formData, bio: e.target.value})}
+            onChange={e => setFormData({ ...formData, bio: e.target.value })}
             disabled={!isEditing}
             rows="4"
             className="w-full p-2 border rounded"

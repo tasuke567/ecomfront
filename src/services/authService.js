@@ -55,5 +55,32 @@ export const authService = {
   },
   isAuthenticated() {
     return !!localStorage.getItem('token');
+  },
+  async updateProfile(userData) {
+    try {
+      let formData;
+      
+      // Check if there's a file to upload
+      if (userData.avatar instanceof File) {
+        formData = new FormData();
+        formData.append('avatar', userData.avatar);
+        Object.keys(userData).forEach(key => {
+          if (key !== 'avatar') {
+            formData.append(key, userData[key]);
+          }
+        });
+      } else {
+        formData = userData;
+      }
+
+      const response = await api.put('/api/user/profile', formData, {
+        headers: {
+          'Content-Type': userData.avatar instanceof File ? 'multipart/form-data' : 'application/json',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
