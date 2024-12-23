@@ -4,11 +4,32 @@ export const authService = {
 
   register: async (userData) => {
     try {
+      console.log('Sending registration data:', userData); // Debug log
+
       const response = await api.post('/auth/register', userData);
-      return response.data;
+      
+      if (response.data.user) {
+        // ถ้ามี token ให้เก็บไว้
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        return response.data;
+      } else {
+        throw new Error(response.data.message || 'Registration failed');
+      }
     } catch (error) {
-      console.error('Registration error:', error.response?.data || error.message);
-      throw error;
+      // จัดการ error ให้ละเอียดขึ้น
+      if (error.response) {
+        // กรณีได้รับ response แต่เป็น error
+        const errorMessage = error.response.data.error || error.response.data.message;
+        throw new Error(errorMessage);
+      } else if (error.request) {
+        // กรณีส่ง request แล้วไม่ได้รับ response
+        throw new Error('No response from server. Please try again later.');
+      } else {
+        // กรณีอื่นๆ
+        throw new Error(error.message);
+      }
     }
   },
 

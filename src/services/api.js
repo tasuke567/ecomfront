@@ -9,55 +9,39 @@ const api = axios.create({
   }
 });
 
-// Add token to requests
+// Add request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Log request details
     console.log('API Request:', {
-      url: `${config.baseURL}${config.url}`,
+      url: config.url,
       method: config.method,
       data: config.data
     });
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    console.error('API Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Response interceptor
+// Add response interceptor for debugging
 api.interceptors.response.use(
   (response) => {
-    // Log successful response
     console.log('API Response:', {
       url: response.config.url,
       status: response.status,
       data: response.data
     });
-    // Handle successful auth response
-    if (response.data?.token) {
-      api.setToken(response.data.token);
-    }
     return response;
   },
   (error) => {
-    // Log error response
     console.error('API Error:', {
       url: error.config?.url,
       status: error.response?.status,
       message: error.message,
       data: error.response?.data
     });
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      api.clearToken();
-      window.location.href = '/login';
-    }
     return Promise.reject(error);
   }
 );

@@ -20,42 +20,52 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
     dispatch(setLoading(true));
 
     try {
-      // Validation
-      if ( !formData.name || !formData.username || !formData.email || !formData.password) {
-        setError('Please provide all required fields');
-        dispatch(setLoading(false));
-        return;
+      // Client-side validation
+      if (!formData.name || !formData.username || !formData.email || !formData.password) {
+        throw new Error('Please provide all required fields');
       }
 
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match');
-        dispatch(setLoading(false));
-        return;
+        throw new Error('Passwords do not match');
       }
 
-      const response = await authService.register({
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
+      // Remove confirmPassword before sending
+      const { confirmPassword, ...registrationData } = formData;
+
+      console.log('Submitting registration data:', registrationData); // Debug log
+
+      const response = await authService.register(registrationData);
 
       if (response.user) {
         dispatch(setUser(response.user));
         navigate('/');
       }
     } catch (err) {
-      // ปรับปรุงการจัดการ error
       console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.error || 
-                          err.response?.data?.message || 
-                          'Registration failed';
+
+      // Improved error message handling
+      let errorMessage = 'Registration failed. Please try again.';
+
+      if (err.message.includes('name: Path `name` is required')) {
+        errorMessage = 'Full name is required';
+      } else if (err.message.includes('duplicate key')) {
+        if (err.message.includes('username')) {
+          errorMessage = 'Username is already taken';
+        } else if (err.message.includes('email')) {
+          errorMessage = 'Email is already registered';
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
       setError(errorMessage);
       dispatch(setAuthError(errorMessage));
     } finally {
+      setIsLoading(false);
       dispatch(setLoading(false));
     }
   };
@@ -168,9 +178,15 @@ const Register = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isLoading}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${isLoading ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
             >
-              Register
+              {isLoading ? (
+                <span>Creating account...</span>
+              ) : (
+                <span>Create Account</span>
+              )}
             </button>
           </div>
         </form>
