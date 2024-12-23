@@ -14,9 +14,31 @@ import PrivateRoute from './components/common/PrivateRoute';
 import { useSelector } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
+import { checkAuthStatus } from '../redux/auth/authSlice';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { authSuccess } from './redux/auth/authSlice';
 
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Check for stored token on app load
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Verify token and get user data
+      authService.verifyToken(token)
+        .then(userData => {
+          dispatch(authSuccess(userData));
+        })
+        .catch(() => {
+          // If token is invalid, remove it
+          localStorage.removeItem('token');
+        });
+    }
+  }, [dispatch]);
+  
   return (
 
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>

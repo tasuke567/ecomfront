@@ -17,15 +17,8 @@ export const updateProfile = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: {
-      id: null,
-      email: null,
-      name: '',
-      phone: '',
-      bio: '',
-      picture: null  // Added picture field
-    },
-    isAuthenticated: false,
+    user: null,
+    isAuthenticated: false, // Make sure this is false initially
     loading: false,
     error: null
   },
@@ -49,6 +42,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
+      // Also remove any stored tokens
+      localStorage.removeItem('token');
     }
   },
   extraReducers: (builder) => {
