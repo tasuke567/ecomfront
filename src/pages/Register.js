@@ -23,39 +23,26 @@ const Register = () => {
     setError('');
     setIsLoading(true);
     dispatch(setLoading(true));
-  
+
     try {
       // Client-side validation
       if (!formData.username || !formData.email || !formData.password) {
         throw new Error('Please provide all required fields');
       }
-  
+
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
-      const userData = {
-        name: formData.name.trim(),
+      // Prepare registration data
+      const registrationData = {
+        username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password
       };
-      console.log('Form data:', formData);
+      console.log('Sending user data:', registrationData);
 
-      if (!formData.username?.trim()) {  // เปลี่ยนจาก name เป็น username
-        alert('Username is required');
-        return;
-      }
-
-      const userData = {
-        username: formData.username.trim(),  // เปลี่ยนจาก name เป็น username
-        email: formData.email.trim(),
-        password: formData.password
-      };
-      
-      // Remove confirmPassword and name before sending
-      const { confirmPassword, name, ...registrationData } = formData;
-  
       const response = await authService.register(registrationData);
-  
+
       if (response) {
         dispatch(setUser(response.user));
         navigate('/');
