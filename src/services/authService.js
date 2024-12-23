@@ -2,38 +2,34 @@ import api from './api';
 
 export const authService = {
 
-  register: async (userData) => {
+  export const register = async (userData) => {
     try {
-      // Only send the required fields
-      const registrationData = {
-        name: userData.username,
-        email: userData.email,
-        password: userData.password
-      };
+      console.log('Sending registration data:', userData);
   
-      console.log('Sending registration data:', registrationData);
+      if (!userData.username?.trim()) {  // เปลี่ยนจาก name เป็น username
+        throw new Error('Username is required');
+      }
   
-      const response = await api.post('/auth/register', registrationData);
-      
-      if (response.data) {
-        if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
+      const response = await axios.post(
+        'https://ecomback-843x.onrender.com/auth/register',
+        {
+          username: userData.username.trim(),  // เปลี่ยนจาก name เป็น username
+          email: userData.email.toLowerCase().trim(),
+          password: userData.password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-        return response.data;
-      } else {
-        throw new Error(response.data.message || 'Registration failed');
-      }
+      );
+  
+      return response.data;
     } catch (error) {
-      if (error.response) {
-        const errorMessage = error.response.data.error || error.response.data.message;
-        throw new Error(errorMessage);
-      } else if (error.request) {
-        throw new Error('No response from server. Please try again later.');
-      } else {
-        throw new Error(error.message);
-      }
+      console.error('Registration error:', error.response?.data || error);
+      throw new Error(error.response?.data?.message || 'Registration failed');
     }
-  },
+  };,
 
   login: async (credentials) => {
     try {

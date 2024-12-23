@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-r  outer-dom';
 import { authService } from '../services/authService';
 import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { setUser, setLoading, setError as setAuthError } from '../redux/auth/authSlice';
@@ -38,7 +38,18 @@ const Register = () => {
         email: formData.email.trim(),
         password: formData.password
       };
-      console.log('Sending user data:', userData);
+      console.log('Form data:', formData);
+
+      if (!formData.username?.trim()) {  // เปลี่ยนจาก name เป็น username
+        alert('Username is required');
+        return;
+      }
+
+      const userData = {
+        username: formData.username.trim(),  // เปลี่ยนจาก name เป็น username
+        email: formData.email.trim(),
+        password: formData.password
+      };
       
       // Remove confirmPassword and name before sending
       const { confirmPassword, name, ...registrationData } = formData;
