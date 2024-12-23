@@ -1,60 +1,75 @@
-// src/components/notifications/NotificationCenter.js
-const NotificationCenter = () => {
+// src/components/notifications/NotificationSystem.js
+const NotificationSystem = () => {
     const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [isOpen, setIsOpen] = useState(false);
+    const [settings, setSettings] = useState({
+      email: true,
+      push: true,
+      orderUpdates: true,
+      promotions: true
+    });
   
     useEffect(() => {
-      // เชื่อมต่อ WebSocket สำหรับแจ้งเตือนแบบ Real-time
+      // Subscribe to WebSocket for real-time notifications
       const ws = new WebSocket('ws://your-websocket-url');
       
       ws.onmessage = (event) => {
-        const newNotification = JSON.parse(event.data);
-        setNotifications(prev => [newNotification, ...prev]);
-        setUnreadCount(prev => prev + 1);
+        const notification = JSON.parse(event.data);
+        handleNewNotification(notification);
       };
   
       return () => ws.close();
     }, []);
   
-    return (
-      <div className="relative">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative p-2"
-        >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+    const handleNewNotification = (notification) => {
+      // Add new notification to state
+      setNotifications(prev => [notification, ...prev]);
+      
+      // Show toast notification
+      toast(notification.message, {
+        icon: notification.type === 'success' ? '✅' : '❗️',
+      });
+    };
   
-        {isOpen && (
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
-            <div className="p-4 border-b">
-              <h3 className="font-medium">Notifications</h3>
-            </div>
-            <div className="max-h-96 overflow-y-auto">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-4 border-b hover:bg-gray-50 ${
-                    !notification.read ? 'bg-blue-50' : ''
-                  }`}
-                >
-                  <p className="text-sm">{notification.message}</p>
-                  <span className="text-xs text-gray-500">
-                    {new Date(notification.createdAt).toRelative()}
-                  </span>
-                </div>
-              ))}
-            </div>
+    return (
+      <div className="space-y-6">
+        {/* Notification Settings */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium mb-4">Notification Settings</h3>
+          <div className="space-y-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={settings.email}
+                onChange={(e) => setSettings({...settings, email: e.target.checked})}
+                className="rounded border-gray-300"
+              />
+              <span className="ml-2">Email Notifications</span>
+            </label>
+            {/* Other notification settings */}
           </div>
-        )}
+        </div>
+  
+        {/* Notification History */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium mb-4">Recent Notifications</h3>
+          <div className="divide-y">
+            {notifications.map((notification) => (
+              <div key={notification.id} className="py-4">
+                <div className="flex items-start">
+                  <div className={`mt-0.5 w-2 h-2 rounded-full ${
+                    notification.read ? 'bg-gray-300' : 'bg-blue-500'
+                  }`} />
+                  <div className="ml-3">
+                    <p className="text-sm text-gray-900">{notification.message}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(notification.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   };
