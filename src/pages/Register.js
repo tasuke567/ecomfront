@@ -24,7 +24,7 @@ const Register = () => {
 
     try {
       // Validation
-      if (!formData.username || !formData.email || !formData.password) {
+      if !formData.name || !formData.username || !formData.email || !formData.password) {
         setError('Please provide all required fields');
         dispatch(setLoading(false));
         return;
@@ -60,8 +60,11 @@ const Register = () => {
     }
   };
 
-  // แสดง error message ที่เหมาะสม
+  // ปรับปรุงฟังก์ชัน getErrorMessage
   const getErrorMessage = (error) => {
+    if (error.includes('name: Path `name` is required')) {
+      return 'Full name is required';
+    }
     if (error.includes('duplicate key')) {
       if (error.includes('username')) {
         return 'Username is already taken';
