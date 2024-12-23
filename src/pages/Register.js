@@ -30,6 +30,12 @@ const Register = () => {
     dispatch(setLoading(true));
 
     try {
+      // ตรวจสอบว่ามีข้อมูลครบ
+      if (!formData.username || !formData.email || !formData.password) {
+        setError('Please provide all required fields');
+        return;
+      }
+
       if (formData.password !== formData.confirmPassword) {
         setError('Passwords do not match');
         return;
@@ -37,6 +43,7 @@ const Register = () => {
 
       const response = await authService.register({
         name: formData.name,
+        username: formData.username,  // เพิ่ม username
         email: formData.email,
         password: formData.password
       });
