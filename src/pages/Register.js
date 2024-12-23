@@ -27,33 +27,27 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
     try {
-      dispatch(authStart());
-      // Only send the fields that the backend expects
-      const registrationData = {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      };
-
-      // Validation
-      if (!registrationData.username || !registrationData.email || !registrationData.password) {
-        setError('Please provide all required fields');
+      // ตรวจสอบ password match
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
         return;
       }
 
-      const response = await authService.register(registrationData);
-      dispatch(authSuccess(response));
-      navigate('/login');
-    } catch (error) {
-      dispatch(authFailure(error.message));
-      const errorMessage = error.response?.data?.message || 'Registration failed';
-      setError(errorMessage);
+      // ส่งข้อมูลไปลงทะเบียน
+      const response = await authService.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
+
+      // ถ้าสำเร็จ login อัตโนมัติ
+      if (response.user) {
+        dispatch(setUser(response.user));
+        navigate('/');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 

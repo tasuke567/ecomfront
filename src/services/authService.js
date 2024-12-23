@@ -2,91 +2,48 @@ import api from './api';
 
 export const authService = {
 
-  // ฟังก์ชันตรวจสอบ token
+  register: async (userData) => {
+    try {
+      const response = await api.post('/auth/register', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Registration error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  login: async (credentials) => {
+    try {
+      const response = await api.post('/auth/login', credentials);
+      const { token, user } = response.data;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      return { token, user };
+    } catch (error) {
+      console.error('Login error:', error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   verifyToken: async (token) => {
     try {
-      // ตรวจสอบว่ามี token หรือไม่
-      if (!token) {
-        throw new Error('No token provided');
-      }
-
-      const response = await fetch(`${api}/auth/verify`, {
-        method: 'GET',
+      const response = await api.get('/auth/verify', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
-
-      // ตรวจสอบ content type
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Server response was not JSON');
-      }
-
-      if (!response.ok) {
-        throw new Error('Token verification failed');
-      }
-
-      const data = await response.json();
-      return data.user;
+      return response.data.user;
     } catch (error) {
-      console.error('Token verification error:', error);
-      // ถ้าเกิด error ให้ล้าง token
+      console.error('Token verification error:', error.response?.data || error.message);
       localStorage.removeItem('token');
       throw error;
     }
   },
 
-  // ฟังก์ชัน login
-  login: async (credentials) => {
-    try {
-      const response = await fetch(`${api}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        return data;
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // ฟังก์ชัน logout
   logout: () => {
     localStorage.removeItem('token');
-  },
-
-  // ฟังก์ชัน register
-  register: async (userData) => {
-    try {
-      const response = await fetch(`${api}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        return data;
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      throw error;
-    }
-  },
+  }
 
   setSession(data) {
     if (data.token) {
