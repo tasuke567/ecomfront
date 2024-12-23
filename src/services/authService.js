@@ -5,21 +5,35 @@ export const authService = {
   // ฟังก์ชันตรวจสอบ token
   verifyToken: async (token) => {
     try {
-      const response = await fetch(`${api}/auth/verify`, {
+      // ตรวจสอบว่ามี token หรือไม่
+      if (!token) {
+        throw new Error('No token provided');
+      }
+
+      const response = await fetch(`${API_URL}/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-        }
+        },
       });
 
+      // ตรวจสอบ content type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server response was not JSON');
+      }
+
       if (!response.ok) {
-        throw new Error('Token invalid');
+        throw new Error('Token verification failed');
       }
 
       const data = await response.json();
       return data.user;
     } catch (error) {
+      console.error('Token verification error:', error);
+      // ถ้าเกิด error ให้ล้าง token
+      localStorage.removeItem('token');
       throw error;
     }
   },
