@@ -1,15 +1,76 @@
 import api from './api';
 
 export const authService = {
-  async login(credentials) {
-    const response = await api.post('/auth/login', credentials);
-    this.setSession(response.data);
-    return response.data;
+
+  // ฟังก์ชันตรวจสอบ token
+  verifyToken: async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/verify`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Token invalid');
+      }
+
+      const data = await response.json();
+      return data.user;
+    } catch (error) {
+      throw error;
+    }
+  },
+  // ฟังก์ชัน login
+  login: async (credentials) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        return data;
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      throw error;
+    }
   },
 
-  async register(userData) {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
+  // ฟังก์ชัน logout
+  logout: () => {
+    localStorage.removeItem('token');
+  },
+
+  // ฟังก์ชัน register
+  register: async (userData) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        return data;
+      } else {
+        throw new Error(data.message);
+      }
+    } catch (error) {
+      throw error;
+    }
   },
 
   setSession(data) {
@@ -19,10 +80,7 @@ export const authService = {
     }
   },
 
-  logout() {
-    localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
-  },
+
   async googleLogin(credential) {
     try {
       if (!credential) {
@@ -39,7 +97,7 @@ export const authService = {
         }
         return response.data;
       }
-       throw new Error('Invalid response from server');
+      throw new Error('Invalid response from server');
 
     } catch (error) {
       console.error('Google login error details:', {
@@ -59,7 +117,7 @@ export const authService = {
   async updateProfile(userData) {
     try {
       let formData;
-      
+
       // Check if there's a file to upload
       if (userData.avatar instanceof File) {
         formData = new FormData();
