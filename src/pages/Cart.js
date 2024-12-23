@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { removeFromCart, updateQuantity, clearCart } from '../redux/cart/cartSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import CartSkeleton from './../components/common/cartSkeleton'
 import EmptyCart from './../components/cart/EmptyCart'
 

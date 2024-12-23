@@ -13,35 +13,57 @@ import ProductDetail from './pages/ProductDetail'
 import PrivateRoute from './components/common/PrivateRoute';
 import { useSelector } from 'react-redux';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-
+import { Toaster } from 'react-hot-toast';
 
 
 function App() {
   return (
 
-    <GoogleOAuthProvider
-      clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-      <BrowserRouter>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <Router>
         <Navbar />
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/product/:id" element={<ProductDetail />} />
           </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-          <Footer />
-      </BrowserRouter>
+        <Footer />
+      </Router>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 2000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            duration: 2000,
+            iconTheme: {
+              primary: '#4ade80',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 2000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
     </GoogleOAuthProvider>
   );
 }
