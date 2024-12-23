@@ -6,7 +6,7 @@ export const authService = {
     try {
       // Only send the required fields
       const registrationData = {
-        username: userData.username,
+        name: userData.username,
         email: userData.email,
         password: userData.password
       };
