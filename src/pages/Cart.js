@@ -63,7 +63,7 @@ const Cart = () => {
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.2 }}
             className="bg-white rounded-lg shadow-sm p-4"
-          ></motion.div>
+          >
             <div key={item.id} className="bg-white rounded-lg shadow-sm p-4">
               {/* Mobile Layout */}
               <div className="flex flex-col md:hidden">
