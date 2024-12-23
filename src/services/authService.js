@@ -5,7 +5,7 @@ export const authService = {
   // ฟังก์ชันตรวจสอบ token
   verifyToken: async (token) => {
     try {
-      const response = await fetch(`${API_URL}/auth/verify`, {
+      const response = await fetch(`${api}/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -26,7 +26,7 @@ export const authService = {
   // ฟังก์ชัน login
   login: async (credentials) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${api}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const authService = {
   // ฟังก์ชัน register
   register: async (userData) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
+      const response = await fetch(`${api}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
