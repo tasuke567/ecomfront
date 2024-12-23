@@ -10,7 +10,7 @@ export const authService = {
         throw new Error('No token provided');
       }
 
-      const response = await fetch(`${API_URL}/auth/verify`, {
+      const response = await fetch(`${api}/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
