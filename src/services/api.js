@@ -13,17 +13,17 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Log request details
-   console.log('API Request:', {
-    url: `${config.baseURL}${config.url}`,
-    method: config.method,
-    data: config.data
-  });
-   const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-},
+    console.log('API Request:', {
+      url: `${config.baseURL}${config.url}`,
+      method: config.method,
+      data: config.data
+    });
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
   (error) => {
     console.error('Request interceptor error:', error);
     return Promise.reject(error);
@@ -39,6 +39,10 @@ api.interceptors.response.use(
       status: response.status,
       data: response.data
     });
+    // Handle successful auth response
+    if (response.data?.token) {
+      api.setToken(response.data.token);
+    }
     return response;
   },
   (error) => {
@@ -51,28 +55,29 @@ api.interceptors.response.use(
     });
     // Handle specific error cases
     if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('token');
+      api.clearToken();
       window.location.href = '/login';
-    }
-    if (error.response?.status === 400) {
-      // Add more context to bad request errors
-      error.message = error.response.data.message || 'Invalid request data';
     }
     return Promise.reject(error);
   }
 );
-// Add helper methods
-api.setToken = (token) => {
-  if (token) {
-    localStorage.setItem('token', token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  }
-  ;
-  api.clearToken = () => {
+// Token management
+const tokenMethods = {
+  setToken: (token) => {
+    if (token) {
+      localStorage.setItem('token', token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  },
+  
+  clearToken: () => {
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
-    ;
   }
-}
+};
+
+// Add token methods to api object
+Object.assign(api, tokenMethods);
+
+
 export default api;

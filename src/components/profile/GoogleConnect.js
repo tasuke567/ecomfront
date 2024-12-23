@@ -18,7 +18,6 @@ const GoogleConnect = () => {
           headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
         });
         const userInfo = await response.json();
-        console.log(userInfo);
         // อัพเดทข้อมูลผู้ใช้ด้วยข้อมูลจาก Google
         dispatch(updateProfile({
           name: userInfo.name,

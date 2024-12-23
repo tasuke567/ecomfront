@@ -6,6 +6,7 @@ import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
 import { useAuth0 } from '@auth0/auth0-react';
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -48,31 +49,22 @@ const Login = () => {
       dispatch(authStart());
       console.log('Google login attempt with credential:', credentialResponse);
 
-      if (!credentialResponse.credential) {
-        throw new Error('No credential received from Google');
-      }
       const response = await authService.googleLogin(credentialResponse.credential);
       console.log('Login response:', response);
 
-      if (response && response.user) {
+      if (response?.user) {
         dispatch(authSuccess(response.user));
-        navigate(location.state?.from || '/');
-      } else {
-        console.error('Invalid response structure:', response);
-        throw new Error('Invalid response from server');
+
+        // Navigate after successful login
+        const from = location.state?.from || '/';
+        navigate(from, { replace: true });
+
+        toast.success('Successfully logged in with Google');
       }
     } catch (error) {
-      console.error('Google login error:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-
+      console.error('Google login error:', error);
       dispatch(authFailure(error.message));
-      setLoginError(
-        error.response?.data?.message ||
-        'Failed to login with Google. Please try again.'
-      );
+      toast.error(error.response?.data?.message || 'Failed to login with Google');
     }
   }, [dispatch, navigate, location.state]);
   const handleGoogleError = useCallback((error) => {
@@ -151,7 +143,7 @@ const Login = () => {
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-gray-50 text-gray-500">
                 Or continue with
-             </span>
+              </span>
             </div>
           </div>
           <div className="mt-6">
