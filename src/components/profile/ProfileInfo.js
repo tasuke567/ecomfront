@@ -1,5 +1,5 @@
 // src/components/profile/ProfileInfo.js
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { updateProfile } from '../../redux/auth/authSlice';
