@@ -4,12 +4,18 @@ export const authService = {
 
   register: async (userData) => {
     try {
-      console.log('Sending registration data:', userData); // Debug log
-
-      const response = await api.post('/auth/register', userData);
+      // Only send the required fields
+      const registrationData = {
+        username: userData.username,
+        email: userData.email,
+        password: userData.password
+      };
+  
+      console.log('Sending registration data:', registrationData);
+  
+      const response = await api.post('/auth/register', registrationData);
       
-      if (response.data.user) {
-        // ถ้ามี token ให้เก็บไว้
+      if (response.data) {
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
         }
@@ -18,16 +24,12 @@ export const authService = {
         throw new Error(response.data.message || 'Registration failed');
       }
     } catch (error) {
-      // จัดการ error ให้ละเอียดขึ้น
       if (error.response) {
-        // กรณีได้รับ response แต่เป็น error
         const errorMessage = error.response.data.error || error.response.data.message;
         throw new Error(errorMessage);
       } else if (error.request) {
-        // กรณีส่ง request แล้วไม่ได้รับ response
         throw new Error('No response from server. Please try again later.');
       } else {
-        // กรณีอื่นๆ
         throw new Error(error.message);
       }
     }

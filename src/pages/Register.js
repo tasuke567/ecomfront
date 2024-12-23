@@ -23,48 +23,30 @@ const Register = () => {
     setError('');
     setIsLoading(true);
     dispatch(setLoading(true));
-
+  
     try {
       // Client-side validation
-      if (!formData.name || !formData.username || !formData.email || !formData.password) {
+      if (!formData.username || !formData.email || !formData.password) {
         throw new Error('Please provide all required fields');
       }
-
+  
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
-
-      // Remove confirmPassword before sending
-      const { confirmPassword, ...registrationData } = formData;
-
-      console.log('Submitting registration data:', registrationData); // Debug log
-
+  
+      // Remove confirmPassword and name before sending
+      const { confirmPassword, name, ...registrationData } = formData;
+  
       const response = await authService.register(registrationData);
-
-      if (response.user) {
+  
+      if (response) {
         dispatch(setUser(response.user));
         navigate('/');
       }
     } catch (err) {
       console.error('Registration error:', err);
-
-      // Improved error message handling
-      let errorMessage = 'Registration failed. Please try again.';
-
-      if (err.message.includes('name: Path `name` is required')) {
-        errorMessage = 'Full name is required';
-      } else if (err.message.includes('duplicate key')) {
-        if (err.message.includes('username')) {
-          errorMessage = 'Username is already taken';
-        } else if (err.message.includes('email')) {
-          errorMessage = 'Email is already registered';
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-      dispatch(setAuthError(errorMessage));
+      setError(err.message);
+      dispatch(setAuthError(err.message));
     } finally {
       setIsLoading(false);
       dispatch(setLoading(false));
