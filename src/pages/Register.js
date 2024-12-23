@@ -33,7 +33,13 @@ const Register = () => {
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Passwords do not match');
       }
-  
+      const userData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        password: formData.password
+      };
+      console.log('Sending user data:', userData);
+      
       // Remove confirmPassword and name before sending
       const { confirmPassword, name, ...registrationData } = formData;
   
