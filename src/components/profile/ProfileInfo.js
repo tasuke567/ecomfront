@@ -9,6 +9,7 @@ const ProfileInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
+  const fileInputRef = useRef(null);
 
   const [previewImage, setPreviewImage] = useState(user?.picture || '/default-avatar.png');
   const [formData, setFormData] = useState({
