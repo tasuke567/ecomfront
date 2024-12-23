@@ -3,7 +3,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-hot-toast';
-import { updateProfile} from '../../redux/actions/userActions'
+import { updateProfile} from '../../redux/auth/authSlice'
 
 const GoogleConnect = () => {
   const dispatch = useDispatch();

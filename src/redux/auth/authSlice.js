@@ -19,7 +19,11 @@ const authSlice = createSlice({
   initialState: {
     user: {
       id: null,
-      email: null
+      email: null,
+      name: '',
+      phone: '',
+      bio: '',
+      picture: null  // Added picture field
     },
     isAuthenticated: false,
     loading: false,
