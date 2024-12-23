@@ -50,9 +50,9 @@ const Register = () => {
     } catch (err) {
       // ปรับปรุงการจัดการ error
       console.error('Registration error:', err);
-      const errorMessage = err.response?.data?.error ||
-        err.response?.data?.message ||
-        'Registration failed';
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Registration failed';
       setError(errorMessage);
       dispatch(setAuthError(errorMessage));
     } finally {
@@ -71,6 +71,13 @@ const Register = () => {
       }
     }
     return error;
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   return (
