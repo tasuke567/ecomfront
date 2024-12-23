@@ -12,9 +12,11 @@ import EmptyCart from './../components/cart/EmptyCart'
 const Cart = () => {
   const { items, total } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Simulate loading
+    setIsLoading(true);
     setTimeout(() => setIsLoading(false), 1000);
   }, []);
 

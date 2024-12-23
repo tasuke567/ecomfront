@@ -1,4 +1,7 @@
 // src/components/cart/EmptyCart.js
+import { Link } from 'react-router-dom';  
+import React from 'react';
+// Add this import
 const EmptyCart = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
