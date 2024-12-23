@@ -24,7 +24,7 @@ const Register = () => {
 
     try {
       // Validation
-      if !formData.name || !formData.username || !formData.email || !formData.password) {
+      if ( !formData.name || !formData.username || !formData.email || !formData.password) {
         setError('Please provide all required fields');
         dispatch(setLoading(false));
         return;
