@@ -5,7 +5,7 @@ import ProductDetail from './pages/ProductDetail'
 import PrivateRoute from './components/common/PrivateRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
-
+import { setUser, setLoading } from './redux/auth/authSlice';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
@@ -33,19 +33,23 @@ function App() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Check for stored token on app load
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Verify token and get user data
-      authService.verifyToken(token)
-        .then(userData => {
-          dispatch(authSuccess(userData));
-        })
-        .catch(() => {
-          // If token is invalid, remove it
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          dispatch(setLoading(true));
+          const userData = await authService.verifyToken(token);
+          dispatch(setUser(userData));
+        } catch (error) {
+          console.error('Token verification failed:', error);
           localStorage.removeItem('token');
-        });
-    }
+        } finally {
+          dispatch(setLoading(false));
+        }
+      }
+    };
+
+    initAuth();
   }, [dispatch]);
   
   return (
