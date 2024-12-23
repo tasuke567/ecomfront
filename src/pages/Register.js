@@ -2,27 +2,18 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { setUser, setLoading, setError as setAuthError } from '../redux/auth/authSlice';
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: '',
-    name: '',      // Add name back to the form state
+    name: '',           // เปลี่ยนจาก username เป็น name
     email: '',
     password: '',
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,8 +26,9 @@ const Register = () => {
         return;
       }
 
+      // ส่ง name แทน username
       const response = await authService.register({
-        username: formData.username,
+        name: formData.name,     // เปลี่ยนจาก username เป็น name
         email: formData.email,
         password: formData.password
       });
@@ -72,12 +64,12 @@ const Register = () => {
             <div>
               <input
                 type="text"
-                name="username"
+                name="name"           // เปลี่ยนจาก username เป็น name
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Username"
-                value={formData.username}
-                onChange={(e) => setFormData({...formData, username: e.target.value})}
+                placeholder="Full Name"  // เปลี่ยน placeholder
+                value={formData.name}    // เปลี่ยนจาก username เป็น name
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
               />
             </div>
             <div>
