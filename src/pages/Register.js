@@ -9,20 +9,13 @@ const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: '',
     username: '',
-    name: '',      // Add name back to the form state
     email: '',
     password: '',
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,20 +23,22 @@ const Register = () => {
     dispatch(setLoading(true));
 
     try {
-      // ตรวจสอบว่ามีข้อมูลครบ
+      // Validation
       if (!formData.username || !formData.email || !formData.password) {
         setError('Please provide all required fields');
+        dispatch(setLoading(false));
         return;
       }
 
       if (formData.password !== formData.confirmPassword) {
         setError('Passwords do not match');
+        dispatch(setLoading(false));
         return;
       }
 
       const response = await authService.register({
         name: formData.name,
-        username: formData.username,  // เพิ่ม username
+        username: formData.username,
         email: formData.email,
         password: formData.password
       });
@@ -53,12 +48,29 @@ const Register = () => {
         navigate('/');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Registration failed';
+      // ปรับปรุงการจัดการ error
+      console.error('Registration error:', err);
+      const errorMessage = err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Registration failed';
       setError(errorMessage);
       dispatch(setAuthError(errorMessage));
     } finally {
       dispatch(setLoading(false));
     }
+  };
+
+  // แสดง error message ที่เหมาะสม
+  const getErrorMessage = (error) => {
+    if (error.includes('duplicate key')) {
+      if (error.includes('username')) {
+        return 'Username is already taken';
+      }
+      if (error.includes('email')) {
+        return 'Email is already registered';
+      }
+    }
+    return error;
   };
 
   return (
