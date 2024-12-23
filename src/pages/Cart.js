@@ -20,10 +20,6 @@ const Cart = () => {
     setTimeout(() => setIsLoading(false), 1000);
   }, []);
 
-  const handleRemoveItem = (itemId) => {
-    dispatch(removeFromCart(itemId));
-    toast.success('Item removed from cart');
-  };
 
   const handleUpdateQuantity = (id, quantity) => {
     dispatch(updateQuantity({ id, quantity }));

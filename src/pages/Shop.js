@@ -1,6 +1,6 @@
 // src/pages/Shop.js
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cart/cartSlice';
 import SearchBar from '../components/search/SearchBar';
 
@@ -24,7 +24,7 @@ const Shop = () => {
     return () => {
       document.head.removeChild(metaDesc);
     };
-  }, []);
+  }, [products]);
 
   // จำลองข้อมูลสินค้า
   const products = [

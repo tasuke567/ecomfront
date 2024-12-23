@@ -1,11 +1,9 @@
 // src/pages/ProductDetail.js
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cart/cartSlice';
 
 const ProductDetail = () => {
-  const { id } = useParams();
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
 

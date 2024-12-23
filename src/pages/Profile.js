@@ -1,6 +1,5 @@
 // src/pages/Profile.js
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import Sidebar from '../components/profile/Sidebar';
 import ProfileInfo from '../components/profile/ProfileInfo';
 import OrderHistory from '../components/profile/OrderHistory';
@@ -10,8 +9,6 @@ import Settings from '../components/profile/Settings';
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  const user = useSelector(state => state.auth.user);
-
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':

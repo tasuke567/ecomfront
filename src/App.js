@@ -7,21 +7,18 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
 import { setUser, setLoading } from './redux/auth/authSlice';
 
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 // แก้ไข path การ import
 import { authService } from './services/authService';
-import { authSuccess } from './redux/auth/authSlice'; // แก้ไขจาก ../redux เป็น ./redux
 
 // Components
 
 import Footer from './components/common/Footer';
-import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Pages
 import Home from './pages/Home';
 import Shop from './pages/Shop';
-import Product from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';

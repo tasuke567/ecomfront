@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { setUser, setLoading, setError as setAuthError } from '../redux/auth/authSlice';
 
 const Register = () => {

@@ -99,9 +99,6 @@ export const authService = {
       throw error;
     }
   },
-  logout() {
-    api.clearToken();
-  },
   isAuthenticated() {
     return !!localStorage.getItem('token');
   },

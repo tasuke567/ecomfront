@@ -36,7 +36,7 @@ const SearchBar = ({ onSearch }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [sampleProducts]);
 
   useEffect(() => {
     // กรองข้อเสนอแนะตามคำค้นหา

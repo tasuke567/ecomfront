@@ -5,7 +5,6 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
-import { useAuth0 } from '@auth0/auth0-react';
 import { toast } from 'react-hot-toast';
 
 const Login = () => {

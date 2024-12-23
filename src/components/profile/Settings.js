@@ -6,8 +6,7 @@ import { updateUserSettings } from '../../redux/actions/userActions';
 
 const Settings = () => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.auth.user);
-
+  
   const [settings, setSettings] = useState({
     emailNotifications: true,
     orderUpdates: true,

@@ -4,7 +4,6 @@ import { useSelector } from 'react-redux';
 
 const Checkout = () => {
   const [step, setStep] = useState(1);
-  const cart = useSelector(state => state.cart);
 
   const steps = [
     { number: 1, title: 'Shipping' },

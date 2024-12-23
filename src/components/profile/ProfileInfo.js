@@ -3,7 +3,6 @@ import React, { useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { updateProfile } from '../../redux/auth/authSlice';
-import GoogleConnect from './GoogleConnect';
 
 const ProfileInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
