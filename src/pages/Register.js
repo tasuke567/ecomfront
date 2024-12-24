@@ -72,15 +72,13 @@ const Register = () => {
     try {
       const registrationData = {
         username: formData.username.trim(),
-        name: formData.name.trim(),
         email: formData.email.toLowerCase().trim(),
         password: formData.password
       };
       console.log('Submitting registration data:', registrationData);
 
       const response = await authService.register(registrationData);
-
-      console.log('Registration response received:', response);
+      console.log('Registration response :', response);
       
       if (response && response.user) {
         dispatch(setUser(response.user));

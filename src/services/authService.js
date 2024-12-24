@@ -45,19 +45,18 @@ export const authService = {
           password: userData.password
         }
       );
+      // Log ค่า response ทั้งหมด
+      console.log('Complete response:', response);
 
+      // response.data คือข้อมูลที่ได้จาก server
+      const data = response.data;
+      console.log('Response data:', data);
 
-      console.log('Raw server response:', response);
-      console.log('Response data:', response.data);
-
-
-      // ตรวจสอบ response format
-      if (response.data?.message === 'Registration successful' && response.data?.user) {
-        console.log('Valid response received:', response.data);
-        return response.data;
+      if (data && data.message === 'Registration successful' && data.user) {
+        return data; // ส่งค่า data กลับไป
       }
-      console.error('Invalid response format:', response.data);
-      throw new Error('Invalid server response format');
+
+      throw new Error('Invalid response format');
     } catch (error) {
       console.error('Registration error details:', {
         message: error.message,
