@@ -47,18 +47,25 @@ const Login = () => {
     try {
       dispatch(authStart());
       console.log('Google login attempt with credential:', credentialResponse);
-
+  
       const response = await authService.googleLogin(credentialResponse.credential);
       console.log('Login response:', response);
-
-      if (response?.user) {
+  
+      if (response.message === 'Google login successful' && response.user) {
+        // Store token if you're using token-based auth
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+  
         dispatch(authSuccess(response.user));
-
+  
         // Navigate after successful login
         const from = location.state?.from || '/';
         navigate(from, { replace: true });
-
+  
         toast.success('Successfully logged in with Google');
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (error) {
       console.error('Google login error:', error);
@@ -66,10 +73,14 @@ const Login = () => {
       toast.error(error.response?.data?.message || 'Failed to login with Google');
     }
   }, [dispatch, navigate, location.state]);
-  const handleGoogleError = useCallback((error) => {
-    console.error('Google login failed:', error);
-    setLoginError('Google login failed. Please try again.');
-  }, []);
+
+
+   const login = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => {
+      toast.error('Google login failed');
+    }
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -145,19 +156,12 @@ const Login = () => {
               </span>
             </div>
           </div>
-          <div className="mt-6">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              useOneTap={false}
-              type="standard"
-              theme="filled_blue"
-              size="large"
-              text="signin_with"
-              shape="rectangular"
-              width="250"
-            />
-          </div>
+          <button
+          onClick={() => login()}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Sign in with Google
+        </button>
           {loginError && (
             <div className="mt-2 text-red-600 text-sm text-center">
               {loginError}
