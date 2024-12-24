@@ -43,23 +43,32 @@ export const authService = {
           username: userData.username.trim(),
           email: userData.email.toLowerCase().trim(),
           password: userData.password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
         }
       );
 
+      // If registration is successful, automatically log in
+      if (response.data.user) {
+        const loginResponse = await api.post('/auth/login', {
+          email: userData.email.toLowerCase().trim(),
+          password: userData.password
+        });
+
+        return {
+          ...response.data,
+          token: loginResponse.data.token
+        };
+      }
+
       return response.data;
     } catch (error) {
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      } else if (error.message) {
-        throw error;
-      } else {
-        throw new Error('Registration failed');
-      }
+      console.error('Registration/Login error:', error);
+      
+      // Handle specific error messages
+      const errorMessage = error.response?.data?.message || 
+                         error.message || 
+                         'Registration failed';
+                         
+      throw new Error(errorMessage);
     }
   },
 
