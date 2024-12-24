@@ -75,7 +75,7 @@ const Login = () => {
   }, [dispatch, navigate, location.state]);
 
 
-   const login = useGoogleLogin({
+   const login = GoogleLogin({
     onSuccess: handleGoogleSuccess,
     onError: () => {
       toast.error('Google login failed');
