@@ -77,33 +77,72 @@ export const authService = {
 
   login: async (credentials) => {
     try {
-      const response = await api.post('/auth/login', credentials);
-      console.log('Login response:', response.data); // Debug log
-
-      // Check if we have a response
-      if (!response || !response.data) {
-        throw new Error('Invalid response from server');
-      }
-
-      // Safely destructure with default values
-      const { token = null, user = null } = response.data;
-
-      // Validate we have the required data
-      if (!token || !user) {
-        throw new Error('Missing token or user data from server');
-      }
-
-      // Store token
-      localStorage.setItem('token', token);
-
-      return { token, user };
-    } catch (error) {
-      console.error('Login error:', {
-        message: error.message,
-        response: error.response?.data
+      console.log('Starting login with credentials:', {
+        email: credentials.email,
+        hasPassword: !!credentials.password
       });
-      // Re-throw with a more specific error message
-      throw new Error(error.response?.data?.message || 'Login failed');
+  
+      // Client-side validation
+      if (!credentials.email?.trim()) {
+        throw new Error('Email is required');
+      }
+  
+      if (!credentials.password) {
+        throw new Error('Password is required');
+      }
+  
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(credentials.email)) {
+        throw new Error('Invalid email format');
+      }
+  
+      // Password length validation
+      if (credentials.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+  
+      const { data } = await api.post('/auth/login', {
+        email: credentials.email.toLowerCase().trim(),
+        password: credentials.password
+      });
+  
+      console.log('Login response data:', data);
+  
+      // ตรวจสอบ response format
+      if (data && data.token && data.user) {
+        // Store token
+        localStorage.setItem('token', data.token);
+  
+        return {
+          user: {
+            id: data.user.id,
+            username: data.user.username,
+            email: data.user.email,
+            role: data.user.role
+          },
+          token: data.token
+        };
+      }
+  
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error('Login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+  
+      // Specific error messages
+      if (error.response?.status === 401) {
+        throw new Error('Invalid email or password');
+      }
+      
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+  
+      throw error;
     }
   },
 

@@ -58,44 +58,34 @@ const Register = () => {
   };
 
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setErrors({});
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
+    setLoginError('');
     dispatch(setLoading(true));
 
     try {
-      const registrationData = {
-        username: formData.username.trim(),
-        email: formData.email.toLowerCase().trim(),
-        password: formData.password
-      };
-      console.log('Submitting registration data:', registrationData);
+        dispatch(authStart());
+        
+        const response = await authService.login({
+            email: formData.email.toLowerCase().trim(),
+            password: formData.password
+        });
 
-      const response = await authService.register(registrationData);
-      console.log('Registration response :', response);
-      
-      if (response && response.user) {
-        dispatch(setUser(response.user));
-        toast.success('Registration successful!');
-        navigate('/');
-      } else {
-        console.error('Invalid response structure:', response);
-        toast.error('Registration failed: Invalid server response');
-      }
-
+        if (response && response.user) {
+            dispatch(authSuccess(response.user));
+            toast.success('Login successful!');
+            
+            // Redirect to the page user tried to visit or default to home
+            const from = location.state?.from || '/';
+            navigate(from, { replace: true });
+        }
     } catch (error) {
-      console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed');
-      setErrors({ submit: error.message || 'Registration failed' });
+        console.error('Login error:', error);
+        dispatch(authFailure(error.message));
+        toast.error(error.message || 'Login failed');
+        setLoginError(error.message || 'Login failed');
     } finally {
-      setIsLoading(false);
-      dispatch(setLoading(false));
+        dispatch(setLoading(false));
     }
 };
 
@@ -195,7 +185,7 @@ const Register = () => {
                 name="confirmPassword"
                 type="password"
                 className={`appearance-none relative block w-full px-3 py-2 border ${errors.username ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm`}
                 value={formData.confirmPassword}
                 onChange={handleChange}
               />

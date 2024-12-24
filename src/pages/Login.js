@@ -1,4 +1,3 @@
-// src/pages/Login.js
 import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
@@ -6,81 +5,80 @@ import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-hot-toast';
+import LoadingButton from './../components/common/LoadingButton';
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
   const [loginError, setLoginError] = useState('');
-  const { loading, error: authError } = useSelector((state) => state.auth);
+  const { loading: isLoading, error: authError } = useSelector((state) => state.auth); // แก้ไขการ destructuring
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+    // Clear error when user starts typing
+    if (loginError) setLoginError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginError(''); // Clear any previous errors
+    
     try {
       dispatch(authStart());
+      
       const response = await authService.login(formData);
-      dispatch(authSuccess(response.user));
-
-      // Redirect to the page user tried to visit or default to home
-      const from = location.state?.from || '/';
-      navigate(from, { replace: true });
+      
+      if (response?.user) {
+        dispatch(authSuccess(response.user));
+        toast.success('Login successful!');
+        
+        // Redirect to the page user tried to visit or default to home
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
+      }
     } catch (error) {
+      console.error('Login error:', error);
       dispatch(authFailure(error.message));
-      loginError(error.response?.data?.message || 'Login failed');
+      setLoginError(error.message || 'Login failed');
+      toast.error(error.message || 'Login failed');
     }
   };
-
 
   const handleGoogleSuccess = useCallback(async (credentialResponse) => {
     try {
       dispatch(authStart());
       console.log('Google login attempt with credential:', credentialResponse);
-  
+
       const response = await authService.googleLogin(credentialResponse.credential);
       console.log('Login response:', response);
-  
+
       if (response.message === 'Google login successful' && response.user) {
-        // Store token if you're using token-based auth
         if (response.token) {
           localStorage.setItem('token', response.token);
         }
-  
+
         dispatch(authSuccess(response.user));
-  
-        // Navigate after successful login
-        const from = location.state?.from || '/';
-        navigate(from, { replace: true });
-  
         toast.success('Successfully logged in with Google');
-      } else {
-        throw new Error('Invalid response from server');
+
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
       }
     } catch (error) {
       console.error('Google login error:', error);
       dispatch(authFailure(error.message));
-      toast.error(error.response?.data?.message || 'Failed to login with Google');
+      toast.error(error.message || 'Failed to login with Google');
     }
   }, [dispatch, navigate, location.state]);
-
-
-   const login = GoogleLogin({
-    onSuccess: handleGoogleSuccess,
-    onError: () => {
-      toast.error('Google login failed');
-    }
-  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -90,13 +88,14 @@ const Login = () => {
             Sign in to your account
           </h2>
         </div>
-        {/* Regular login form */}
+        
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {authError && (
+          {(loginError || authError) && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-              {authError}
+              {loginError || authError}
             </div>
           )}
+          
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
@@ -127,13 +126,13 @@ const Login = () => {
           </div>
 
           <div>
-            <button
+            <LoadingButton
               type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              isLoading={isLoading}
+              className="w-full"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
-            </button>
+              Sign In
+            </LoadingButton>
           </div>
 
           <div className="text-sm text-center">
@@ -143,8 +142,6 @@ const Login = () => {
           </div>
         </form>
 
-
-        {/* Social Login Buttons */}
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -156,17 +153,13 @@ const Login = () => {
               </span>
             </div>
           </div>
-          <button
-          onClick={() => login()}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Sign in with Google
-        </button>
-          {loginError && (
-            <div className="mt-2 text-red-600 text-sm text-center">
-              {loginError}
-            </div>
-          )}
+          
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => {
+              toast.error('Google login failed');
+            }}
+          />
         </div>
       </div>
     </div>
