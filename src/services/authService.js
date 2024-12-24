@@ -1,8 +1,6 @@
 import api from './api';
 
 export const authService = {
-
-  // authService.js
   register: async (userData) => {
     try {
       console.log('Starting registration with data:', userData);
@@ -26,198 +24,183 @@ export const authService = {
         throw new Error('Invalid email format');
       }
 
-      // Username validation (alphanumeric and underscore only)
+      // Username validation
       const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
       if (!usernameRegex.test(userData.username)) {
         throw new Error('Username must be 3-20 characters long and can only contain letters, numbers, and underscores');
       }
 
-      // Password strength validation
+      // Password validation
       if (userData.password.length < 6) {
         throw new Error('Password must be at least 6 characters long');
       }
 
-      const data = await api.post(
-        '/auth/register',
-        {
-          username: userData.username.trim(),
-          email: userData.email.toLowerCase().trim(),
-          password: userData.password
-        }
-      );
-      console.log('Response data received:', data);
-
-      // ตรวจสอบ response format
-      if (data && data.message === 'Registration successful' && data.user) {
-        return {
-          user: {
-            id: data.user.id,
-            username: data.user.username,
-            email: data.user.email,
-            role: data.user.role
-          },
-          message: data.message
-        };
-      }
-
-      throw new Error('Invalid response format');
-    } catch (error) {
-      console.error('Registration error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
+      const response = await api.post('/auth/register', {
+        username: userData.username.trim(),
+        email: userData.email.toLowerCase().trim(),
+        password: userData.password
       });
 
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+      const data = response.data;
+      console.log('Registration response:', data);
+
+      if (!data || !data.user) {
+        throw new Error('Invalid response format');
       }
-      throw error;
+
+      return {
+        user: {
+          id: data.user.id || data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+          role: data.user.role
+        },
+        message: data.message
+      };
+    } catch (error) {
+      this.handleError(error, 'Registration failed');
     }
   },
 
-  // authService.js
-  // authService.js
-  // authService.js
   login: async (credentials) => {
     try {
-      console.log('Starting login with credentials:', {
-        email: credentials.email,
-        hasPassword: !!credentials.password
-      });
-
       const response = await api.post('/auth/login', {
         email: credentials.email.toLowerCase().trim(),
         password: credentials.password
       });
 
-      // เข้าถึง response.data โดยตรง
       const data = response.data;
-      console.log('Login response data:', data);
+      console.log('Login response:', data);
 
-      // ตรวจสอบ response data structure
-      if (data && data.message === 'Login successful' && data.user && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
-        api.setToken(data.token);
-
-        return {
-          user: {
-            id: data.user.id || data.user._id, // รองรับทั้ง id และ _id
-            username: data.user.username,
-            email: data.user.email,
-            role: data.user.role
-          },
-          token: data.token
-        };
+      if (!data || !data.user || !data.token) {
+        throw new Error('Invalid response format');
       }
 
-      throw new Error('Invalid response format');
+      this.setSession(data);
 
+      return {
+        user: {
+          id: data.user.id || data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+          role: data.user.role
+        },
+        token: data.token
+      };
     } catch (error) {
-      console.error('Login error details:', {
-        message: error.message,
-        responseData: error.response?.data,
-        status: error.response?.status
-      });
-
-      if (error.response?.status === 401) {
-        throw new Error('Invalid email or password');
-      }
-
-      if (error.response?.status === 404) {
-        throw new Error('User not found');
-      }
-
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-
-      throw new Error('Login failed. Please try again.');
+      this.handleError(error, 'Login failed');
     }
   },
 
-  verifyToken: async (token) => {
-    try {
-      const response = await api.get('/auth/verify', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      return response.data.user;
-    } catch (error) {
-      console.error('Token verification error:', error.response?.data || error.message);
-      localStorage.removeItem('token');
-      throw error;
-    }
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-  },
-
-  setSession(data) {
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-    }
-  },
-
-
-  async googleLogin(credential) {
+  googleLogin: async (credential) => {
     try {
       if (!credential) {
         throw new Error('No credential provided');
       }
-      const response = await api.post('/auth/google', {
-        credential: credential,
-      });
 
-      if (response.data) {
-        // จัดการ token ถ้ามี
-        if (response.data?.token) {
-          localStorage.setItem('token', response.data.token);
-        }
-        return response.data;
+      const response = await api.post('/auth/google', { credential });
+      const data = response.data;
+
+      if (!data || !data.user) {
+        throw new Error('Invalid response format');
       }
-      throw new Error('Invalid response from server');
 
+      this.setSession(data);
+
+      return {
+        user: data.user,
+        token: data.token
+      };
     } catch (error) {
-      console.error('Google login error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      this.handleError(error, 'Google login failed');
+    }
+  },
+
+  setSession: (data) => {
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      api.setToken(data.token);
+    }
+  },
+
+  clearSession: () => {
+    localStorage.removeItem('token');
+    api.clearToken();
+  },
+
+  logout: () => {
+    authService.clearSession();
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('token');
+  },
+
+  verifyToken: async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+
+      const response = await api.get('/auth/verify');
+      return response.data.user;
+    } catch (error) {
+      authService.clearSession();
       throw error;
     }
   },
-  isAuthenticated() {
-    return !!localStorage.getItem('token');
-  },
-  async updateProfile(userData) {
-    try {
-      let formData;
 
-      // Check if there's a file to upload
-      if (userData.avatar instanceof File) {
-        formData = new FormData();
-        formData.append('avatar', userData.avatar);
-        Object.keys(userData).forEach(key => {
-          if (key !== 'avatar') {
-            formData.append(key, userData[key]);
-          }
-        });
-      } else {
-        formData = userData;
-      }
+  updateProfile: async (userData) => {
+    try {
+      const formData = userData.avatar instanceof File 
+        ? this.createFormData(userData)
+        : userData;
 
       const response = await api.put('/api/user/profile', formData, {
         headers: {
-          'Content-Type': userData.avatar instanceof File ? 'multipart/form-data' : 'application/json',
+          'Content-Type': userData.avatar instanceof File 
+            ? 'multipart/form-data' 
+            : 'application/json',
         },
       });
+      
       return response.data;
     } catch (error) {
-      throw error;
+      this.handleError(error, 'Profile update failed');
     }
+  },
+
+  // Helper methods
+  createFormData: (userData) => {
+    const formData = new FormData();
+    formData.append('avatar', userData.avatar);
+    
+    Object.keys(userData).forEach(key => {
+      if (key !== 'avatar') {
+        formData.append(key, userData[key]);
+      }
+    });
+
+    return formData;
+  },
+
+  handleError: (error, defaultMessage) => {
+    console.error('API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+
+    if (error.response?.status === 401) {
+      authService.clearSession();
+      throw new Error('Session expired. Please login again.');
+    }
+
+    if (error.response?.data?.message) {
+      throw new Error(error.response.data.message);
+    }
+
+    throw new Error(defaultMessage);
   }
 };
+
+export default authService;
