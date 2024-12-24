@@ -77,6 +77,7 @@ export const authService = {
 
   // authService.js
   // authService.js
+  // authService.js
   login: async (credentials) => {
     try {
       console.log('Starting login with credentials:', {
@@ -89,47 +90,49 @@ export const authService = {
         password: credentials.password
       });
 
-      console.log('Full login response:', response);
+      // เข้าถึง response.data โดยตรง
       const data = response.data;
       console.log('Login response data:', data);
 
-      // ตรวจสอบ response format
-      if (!data || !data.user || !data.token) {
-        throw new Error('Invalid response format');
+      // ตรวจสอบ response data structure
+      if (data && data.message === 'Login successful' && data.user && data.token) {
+        // Store token
+        localStorage.setItem('token', data.token);
+        api.setToken(data.token);
+
+        return {
+          user: {
+            id: data.user.id || data.user._id, // รองรับทั้ง id และ _id
+            username: data.user.username,
+            email: data.user.email,
+            role: data.user.role
+          },
+          token: data.token
+        };
       }
 
-      // Store token
-      localStorage.setItem('token', data.token);
-
-      // Return the user data and token
-      return {
-        user: {
-          id: data.user.id,
-          username: data.user.username,
-          email: data.user.email,
-          role: data.user.role
-        },
-        token: data.token
-      };
+      throw new Error('Invalid response format');
 
     } catch (error) {
       console.error('Login error details:', {
         message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        error
+        responseData: error.response?.data,
+        status: error.response?.status
       });
 
-      // Handle specific error cases
       if (error.response?.status === 401) {
         throw new Error('Invalid email or password');
+      }
+
+      if (error.response?.status === 404) {
+        throw new Error('User not found');
       }
 
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
 
-      throw new Error(error.message || 'Login failed');
+      throw new Error('Login failed. Please try again.');
     }
   },
 
