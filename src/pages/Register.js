@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { setUser, setLoading, setError as setAuthError } from '../redux/auth/authSlice';
+import { setUser, setLoading } from '../redux/auth/authSlice';
 import toast from 'react-hot-toast';
 
 const Register = () => {
