@@ -1,33 +1,15 @@
 // src/pages/Shop.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo  } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cart/cartSlice';
 import SearchBar from '../components/search/SearchBar';
 
+
 const Shop = () => {
   const dispatch = useDispatch();
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    category: 'all',
-    priceRange: 'all',
-    sort: 'newest'
-  });
 
-  useEffect(() => {
-    document.title = "Shop | Your Store Name";
-    const metaDesc = document.createElement('meta');
-    metaDesc.name = "description";
-    metaDesc.content = "Browse our collection of products with great deals and fast shipping";
-    document.head.appendChild(metaDesc);
-
-    return () => {
-      document.head.removeChild(metaDesc);
-    };
-  }, [products]);
-
-  // จำลองข้อมูลสินค้า
-  const products = [
+  // Move products definition to the top
+  const products = useMemo(() => [
     {
       id: 1,
       name: "Smartphone X",
@@ -52,9 +34,31 @@ const Shop = () => {
       description: "High-quality wireless headphones",
       image: "/api/placeholder/400/320"
     }
-  ];
+  ], []);
 
-  // Filter products based on search and filters
+  // State declarations
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    category: 'all',
+    priceRange: 'all',
+    sort: 'newest'
+  });
+
+  // Set page metadata
+  useEffect(() => {
+    document.title = "Shop | Your Store Name";
+    const metaDesc = document.createElement('meta');
+    metaDesc.name = "description";
+    metaDesc.content = "Browse our collection of products with great deals and fast shipping";
+    document.head.appendChild(metaDesc);
+
+    return () => {
+      document.head.removeChild(metaDesc);
+    };
+  }, []); // Remove products dependency as it's not needed here
+
+  // Filter and sort products
   useEffect(() => {
     let result = [...products];
 
@@ -92,7 +96,7 @@ const Shop = () => {
     }
 
     setFilteredProducts(result);
-  }, [searchTerm, filters]);
+  }, [searchTerm, filters, products]);
 
   const handleSearch = (term) => {
     setSearchTerm(term);

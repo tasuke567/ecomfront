@@ -56,22 +56,6 @@ const Register = () => {
     }
   };
 
-  // ปรับปรุงฟังก์ชัน getErrorMessage
-  const getErrorMessage = (error) => {
-    if (error.includes('name: Path `name` is required')) {
-      return 'Full name is required';
-    }
-    if (error.includes('duplicate key')) {
-      if (error.includes('username')) {
-        return 'Username is already taken';
-      }
-      if (error.includes('email')) {
-        return 'Email is already registered';
-      }
-    }
-    return error;
-  };
-
   const handleChange = (e) => {
     setFormData({
       ...formData,

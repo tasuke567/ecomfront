@@ -1,6 +1,5 @@
 // src/pages/Checkout.js
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 const Checkout = () => {
   const [step, setStep] = useState(1);

@@ -1,16 +1,18 @@
 // src/components/search/SearchBar.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo  } from 'react';
 
 const SearchBar = ({ onSearch }) => {
+   // Add inputRef declaration
+   const inputRef = useRef(null);
+  // Move all state declarations to the top
+  const wrapperRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const wrapperRef = useRef(null);
-  const inputRef = useRef(null);
 
-  // ข้อมูลจำลองสำหรับ auto-complete
-  const sampleProducts = [
+  // Sample products data
+  const sampleProducts = useMemo(() => [
     "iPhone 13 Pro",
     "iPhone 14 Pro",
     "Samsung Galaxy S23",
@@ -21,10 +23,10 @@ const SearchBar = ({ onSearch }) => {
     "Samsung Galaxy Watch",
     "Apple Watch",
     "Gaming Laptop"
-  ];
+  ], []);
 
+  // Handle clicks outside search box
   useEffect(() => {
-    // ปิด suggestions เมื่อคลิกนอกกล่องค้นหา
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -36,10 +38,10 @@ const SearchBar = ({ onSearch }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, []); // Remove sampleProducts from dependencies as it's not used in this effect
 
+  // Filter suggestions based on search term
   useEffect(() => {
-    // กรองข้อเสนอแนะตามคำค้นหา
     if (searchTerm.trim() === '') {
       setSuggestions([]);
       setSelectedIndex(-1);
@@ -52,7 +54,7 @@ const SearchBar = ({ onSearch }) => {
     setSuggestions(filtered);
     setSelectedIndex(-1);
     setIsOpen(true);
-  }, [searchTerm]);
+  }, [searchTerm, sampleProducts]);
 
   const handleKeyDown = (e) => {
     // ไม่ทำอะไรถ้าไม่มี suggestions หรือปิดอยู่

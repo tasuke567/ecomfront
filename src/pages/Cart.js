@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { removeFromCart, updateQuantity, clearCart } from '../redux/cart/cartSlice';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'react-hot-toast';
 import { useEffect, useState } from 'react';
 import CartSkeleton from './../components/common/cartSkeleton'
 import EmptyCart from './../components/cart/EmptyCart'
@@ -19,12 +18,6 @@ const Cart = () => {
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 1000);
   }, []);
-
-
-  const handleUpdateQuantity = (id, quantity) => {
-    dispatch(updateQuantity({ id, quantity }));
-    toast.success('Cart updated');
-  };
 
   if (isLoading) return <CartSkeleton />;
   if (items.length === 0) return <EmptyCart />;
