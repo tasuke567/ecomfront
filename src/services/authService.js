@@ -76,6 +76,7 @@ export const authService = {
   },
 
   // authService.js
+  // authService.js
   login: async (credentials) => {
     try {
       console.log('Starting login with credentials:', {
@@ -83,37 +84,43 @@ export const authService = {
         hasPassword: !!credentials.password
       });
 
-      const { data } = await api.post('/auth/login', {
+      const response = await api.post('/auth/login', {
         email: credentials.email.toLowerCase().trim(),
         password: credentials.password
       });
 
+      console.log('Full login response:', response);
+      const data = response.data;
       console.log('Login response data:', data);
 
       // ตรวจสอบ response format
-      if (data && data.user && data.token) {
-        // Store token
-        localStorage.setItem('token', data.token);
-
-        return {
-          user: {
-            id: data.user.id,
-            username: data.user.username,
-            email: data.user.email,
-            role: data.user.role
-          },
-          token: data.token
-        };
+      if (!data || !data.user || !data.token) {
+        throw new Error('Invalid response format');
       }
 
-      throw new Error('Invalid response format');
+      // Store token
+      localStorage.setItem('token', data.token);
+
+      // Return the user data and token
+      return {
+        user: {
+          id: data.user.id,
+          username: data.user.username,
+          email: data.user.email,
+          role: data.user.role
+        },
+        token: data.token
+      };
+
     } catch (error) {
       console.error('Login error details:', {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
+        error
       });
 
+      // Handle specific error cases
       if (error.response?.status === 401) {
         throw new Error('Invalid email or password');
       }
@@ -122,7 +129,7 @@ export const authService = {
         throw new Error(error.response.data.message);
       }
 
-      throw error;
+      throw new Error(error.message || 'Login failed');
     }
   },
 
