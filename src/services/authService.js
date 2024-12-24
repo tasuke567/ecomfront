@@ -66,14 +66,32 @@ export const authService = {
   login: async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      const { token, user } = response.data;
-      if (token) {
-        localStorage.setItem('token', token);
+      console.log('Login response:', response.data); // Debug log
+
+      // Check if we have a response
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server');
       }
+
+      // Safely destructure with default values
+      const { token = null, user = null } = response.data;
+
+      // Validate we have the required data
+      if (!token || !user) {
+        throw new Error('Missing token or user data from server');
+      }
+
+      // Store token
+      localStorage.setItem('token', token);
+
       return { token, user };
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      throw error;
+      console.error('Login error:', {
+        message: error.message,
+        response: error.response?.data
+      });
+      // Re-throw with a more specific error message
+      throw new Error(error.response?.data?.message || 'Login failed');
     }
   },
 
