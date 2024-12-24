@@ -58,7 +58,7 @@ export const authService = {
         message: data.message
       };
     } catch (error) {
-      this.handleError(error, 'Registration failed');
+      authService.handleError(error, 'Registration failed');
     }
   },
 
@@ -76,7 +76,7 @@ export const authService = {
         throw new Error('Invalid response format');
       }
 
-      setSession(data);
+      authService.setSession(data);
 
       return {
         user: {
@@ -88,7 +88,7 @@ export const authService = {
         token: data.token
       };
     } catch (error) {
-      handleError(error, 'Login failed');
+      authService.handleError(error, 'Login failed');
     }
   },
 
