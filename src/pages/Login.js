@@ -46,7 +46,7 @@ const Login = () => {
         const from = location.state?.from?.pathname || '/';
         navigate(from, { replace: true });
       }
-      console.log('Successful Login Result:', result);
+      console.log('Successful Login Result:', response);
     } catch (error) {
       console.error('Detailed Login Error:', error);
       dispatch(authFailure(error.message));
