@@ -76,28 +76,25 @@ const Register = () => {
         email: formData.email.toLowerCase().trim(),
         password: formData.password
       };
+      console.log('Submitting registration data:', registrationData);
 
       const response = await authService.register(registrationData);
+
+      console.log('Registration response received:', response);
       
-      // ตรวจสอบ response ตาม format ที่ได้จาก server
-      if (response.message === 'Registration successful' && response.user) {
-        dispatch(setUser({
-          id: response.user.id,
-          username: response.user.username,
-          email: response.user.email,
-          role: response.user.role
-        }));
-        
+      if (response && response.user) {
+        dispatch(setUser(response.user));
         toast.success('Registration successful!');
         navigate('/');
+      } else {
+        console.error('Invalid response structure:', response);
+        toast.error('Registration failed: Invalid server response');
       }
 
     } catch (error) {
       console.error('Registration error:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
-      setErrors({ submit: errorMessage });
-      dispatch(setAuthError(errorMessage));
-      toast.error(errorMessage);
+      toast.error(error.message || 'Registration failed');
+      setErrors({ submit: error.message || 'Registration failed' });
     } finally {
       setIsLoading(false);
       dispatch(setLoading(false));

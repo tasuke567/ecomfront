@@ -63,6 +63,7 @@ api.interceptors.response.use(
   (response) => {
     console.log('API Response:', {
       url: response.config.url,
+      method: response.config.method,
       status: response.status,
       data: response.data
     });
@@ -72,8 +73,8 @@ api.interceptors.response.use(
     // Handle different types of errors
     const errorResponse = {
       url: error.config?.url,
+      method: error.config?.method,
       status: error.response?.status,
-      message: error.message,
       data: error.response?.data
     };
 

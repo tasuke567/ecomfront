@@ -5,7 +5,7 @@ export const authService = {
   // authService.js
   register: async (userData) => {
     try {
-      console.log('Sending registration data:', userData);
+      console.log('Starting registration with data:', userData);
 
       // Client-side validation
       if (!userData.username?.trim()) {
@@ -47,21 +47,28 @@ export const authService = {
       );
 
 
+      console.log('Raw server response:', response);
+      console.log('Response data:', response.data);
+
+
       // ตรวจสอบ response format
       if (response.data?.message === 'Registration successful' && response.data?.user) {
+        console.log('Valid response received:', response.data);
         return response.data;
       }
-
-      throw new Error('Invalid response from server');
+      console.error('Invalid response format:', response.data);
+      throw new Error('Invalid server response format');
     } catch (error) {
-      console.error('Registration/Login error:', error);
+      console.error('Registration error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
 
-      // Handle specific error messages
-      const errorMessage = error.response?.data?.message ||
-        error.message ||
-        'Registration failed';
-
-      throw new Error(errorMessage);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
     }
   },
 
