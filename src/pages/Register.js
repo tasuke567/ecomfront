@@ -79,15 +79,13 @@ const Register = () => {
 
       const response = await authService.register(registrationData);
 
-      if (response.user) {
-        // Check if we have a token from auto-login
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-
+       // Check if response exists and has the expected data
+       if (response && response.message === 'Registration successful') {
         dispatch(setUser(response.user));
         toast.success('Registration successful!');
         navigate('/');
+      } else {
+        throw new Error('Invalid response from server');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Registration failed';

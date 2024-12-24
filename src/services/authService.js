@@ -45,6 +45,12 @@ export const authService = {
           password: userData.password
         }
       );
+      // Log response for debugging
+      console.log('Registration response:', response.data);
+      // Check if response has the expected structure
+      if (!response.data || !response.data.user) {
+        throw new Error('Invalid response format from server');
+      }
 
       // If registration is successful, automatically log in
       if (response.data.user) {
