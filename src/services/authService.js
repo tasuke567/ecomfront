@@ -37,7 +37,7 @@ export const authService = {
         throw new Error('Password must be at least 6 characters long');
       }
 
-      const response = await api.post(
+      const data = await api.post(
         '/auth/register',
         {
           username: userData.username.trim(),
@@ -45,15 +45,19 @@ export const authService = {
           password: userData.password
         }
       );
-      // Log ค่า response ทั้งหมด
-      console.log('Complete response:', response);
+      console.log('Response data received:', data);
 
-      // response.data คือข้อมูลที่ได้จาก server
-      const data = response.data;
-      console.log('Response data:', data);
-
+      // ตรวจสอบ response format
       if (data && data.message === 'Registration successful' && data.user) {
-        return data; // ส่งค่า data กลับไป
+        return {
+          user: {
+            id: data.user.id,
+            username: data.user.username,
+            email: data.user.email,
+            role: data.user.role
+          },
+          message: data.message
+        };
       }
 
       throw new Error('Invalid response format');
