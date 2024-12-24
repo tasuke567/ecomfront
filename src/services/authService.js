@@ -45,35 +45,22 @@ export const authService = {
           password: userData.password
         }
       );
-      // Log response for debugging
-      console.log('Registration response:', response.data);
-      // Check if response has the expected structure
-      if (!response.data || !response.data.user) {
-        throw new Error('Invalid response format from server');
+
+
+      // ตรวจสอบ response format
+      if (response.data?.message === 'Registration successful' && response.data?.user) {
+        return response.data;
       }
 
-      // If registration is successful, automatically log in
-      if (response.data.user) {
-        const loginResponse = await api.post('/auth/login', {
-          email: userData.email.toLowerCase().trim(),
-          password: userData.password
-        });
-
-        return {
-          ...response.data,
-          token: loginResponse.data.token
-        };
-      }
-
-      return response.data;
+      throw new Error('Invalid response from server');
     } catch (error) {
       console.error('Registration/Login error:', error);
-      
+
       // Handle specific error messages
-      const errorMessage = error.response?.data?.message || 
-                         error.message || 
-                         'Registration failed';
-                         
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        'Registration failed';
+
       throw new Error(errorMessage);
     }
   },

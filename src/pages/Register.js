@@ -61,7 +61,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
-    // Validate form
+
     if (!validateForm()) {
       return;
     }
@@ -78,17 +78,23 @@ const Register = () => {
       };
 
       const response = await authService.register(registrationData);
-
-       // Check if response exists and has the expected data
-       if (response && response.message === 'Registration successful') {
-        dispatch(setUser(response.user));
+      
+      // ตรวจสอบ response ตาม format ที่ได้จาก server
+      if (response.message === 'Registration successful' && response.user) {
+        dispatch(setUser({
+          id: response.user.id,
+          username: response.user.username,
+          email: response.user.email,
+          role: response.user.role
+        }));
+        
         toast.success('Registration successful!');
         navigate('/');
-      } else {
-        throw new Error('Invalid response from server');
       }
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.message || 'Registration failed';
+
+    } catch (error) {
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
       setErrors({ submit: errorMessage });
       dispatch(setAuthError(errorMessage));
       toast.error(errorMessage);
@@ -96,7 +102,7 @@ const Register = () => {
       setIsLoading(false);
       dispatch(setLoading(false));
     }
-  };
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
