@@ -46,8 +46,9 @@ const Login = () => {
         const from = location.state?.from?.pathname || '/';
         navigate(from, { replace: true });
       }
+      console.log('Successful Login Result:', result);
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Detailed Login Error:', error);
       dispatch(authFailure(error.message));
       setLoginError(error.message || 'Login failed');
       toast.error(error.message || 'Login failed');

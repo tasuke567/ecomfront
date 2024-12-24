@@ -64,20 +64,35 @@ export const authService = {
 
   login: async (credentials) => {
     try {
+      console.log('Login credentials:', {
+        email: credentials.email.toLowerCase().trim(),
+        // Don't log password for security
+      });
+  
       const response = await api.post('/auth/login', {
         email: credentials.email.toLowerCase().trim(),
         password: credentials.password
       });
-
-      const data = response.data;
-      console.log('Login response:', data);
-
-      if (!data || !data.user || !data.token) {
-        throw new Error('Invalid response format');
+  
+      // Add more detailed logging
+      console.log('Full API Response:', response);
+      console.log('Response Status:', response.status);
+      console.log('Response Data:', response.data);
+  
+      // More robust response checking
+      if (!response || !response.data) {
+        throw new Error('No response received from server');
       }
-
+  
+      const data = response.data;
+  
+      if (!data.user || !data.token) {
+        console.error('Invalid response structure:', data);
+        throw new Error('Invalid response format: Missing user or token');
+      }
+  
       authService.setSession(data);
-
+  
       return {
         user: {
           id: data.user.id || data.user._id,
@@ -88,6 +103,14 @@ export const authService = {
         token: data.token
       };
     } catch (error) {
+      // More detailed error logging
+      console.error('Login Error Details:', {
+        name: error.name,
+        message: error.message,
+        response: error.response,
+        config: error.config
+      });
+  
       authService.handleError(error, 'Login failed');
     }
   },
