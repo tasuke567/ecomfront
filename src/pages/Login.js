@@ -5,7 +5,7 @@ import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-hot-toast';
-import LoadingButton from './../components/common/LoadingButton';
+import LoadingButton from './../components/common/Loading';
 
 const Login = () => {
   const navigate = useNavigate();
