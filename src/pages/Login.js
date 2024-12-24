@@ -5,7 +5,7 @@ import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
 import { authService } from '../services/authService';
 import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-hot-toast';
-import LoadingButton from './../components/common/Loading';
+import {LoadingButton} from './../components/common/Loading';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -32,16 +32,16 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginError(''); // Clear any previous errors
-    
+
     try {
       dispatch(authStart());
-      
+
       const response = await authService.login(formData);
-      
+
       if (response?.user) {
         dispatch(authSuccess(response.user));
         toast.success('Login successful!');
-        
+
         // Redirect to the page user tried to visit or default to home
         const from = location.state?.from?.pathname || '/';
         navigate(from, { replace: true });
@@ -88,14 +88,14 @@ const Login = () => {
             Sign in to your account
           </h2>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {(loginError || authError) && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
               {loginError || authError}
             </div>
           )}
-          
+
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
@@ -153,7 +153,7 @@ const Login = () => {
               </span>
             </div>
           </div>
-          
+
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => {
