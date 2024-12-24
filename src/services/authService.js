@@ -2,18 +2,45 @@ import api from './api';
 
 export const authService = {
 
+  // authService.js
   register: async (userData) => {
     try {
       console.log('Sending registration data:', userData);
-  
-      if (!userData.username?.trim()) {  // เปลี่ยนจาก name เป็น username
+
+      // Client-side validation
+      if (!userData.username?.trim()) {
         throw new Error('Username is required');
       }
-  
+
+      if (!userData.email?.trim()) {
+        throw new Error('Email is required');
+      }
+
+      if (!userData.password) {
+        throw new Error('Password is required');
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.email)) {
+        throw new Error('Invalid email format');
+      }
+
+      // Username validation (alphanumeric and underscore only)
+      const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+      if (!usernameRegex.test(userData.username)) {
+        throw new Error('Username must be 3-20 characters long and can only contain letters, numbers, and underscores');
+      }
+
+      // Password strength validation
+      if (userData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
       const response = await api.post(
         '/auth/register',
         {
-          username: userData.username.trim(),  // เปลี่ยนจาก name เป็น username
+          username: userData.username.trim(),
           email: userData.email.toLowerCase().trim(),
           password: userData.password
         },
@@ -23,11 +50,16 @@ export const authService = {
           }
         }
       );
-  
+
       return response.data;
     } catch (error) {
-      console.error('Registration error:', error.response?.data || error);
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      } else if (error.message) {
+        throw error;
+      } else {
+        throw new Error('Registration failed');
+      }
     }
   },
 
