@@ -40,7 +40,6 @@ const Login = () => {
 
       if (response?.user) {
         dispatch(authSuccess(response.user));
-<<<<<<< HEAD
         toast.success("Login successful!");
 
         // Redirect to the page the user tried to visit or default to home
@@ -98,48 +97,6 @@ const Login = () => {
   );
   
   
-=======
-        toast.success('Login successful!');
-
-        // Redirect to the page user tried to visit or default to home
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      }
-      console.log('Successful Login Result:', result);
-    } catch (error) {
-      console.error('Detailed Login Error:', error);
-      dispatch(authFailure(error.message));
-      setLoginError(error.message || 'Login failed');
-      toast.error(error.message || 'Login failed');
-    }
-  };
-
-  const handleGoogleSuccess = useCallback(async (credentialResponse) => {
-    try {
-      dispatch(authStart());
-      console.log('Google login attempt with credential:', credentialResponse);
-
-      const response = await authService.googleLogin(credentialResponse.credential);
-      console.log('Login response:', response);
-
-      if (response.message === 'Google login successful' && response.user) {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-
-        dispatch(authSuccess(response.user));
-        toast.success('Successfully logged in with Google');
-
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      dispatch(authFailure(error.message));
-      toast.error(error.message || 'Failed to login with Google');
-    }
-  }, [dispatch, navigate, location.state]);
->>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
