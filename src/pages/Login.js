@@ -1,93 +1,96 @@
-import React, { useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { authStart, authSuccess, authFailure } from '../redux/auth/authSlice';
-import { authService } from '../services/authService';
-import { GoogleLogin } from '@react-oauth/google';
-import { toast } from 'react-hot-toast';
-import {LoadingButton} from './../components/common/Loading';
+import React, { useState, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { authStart, authSuccess, authFailure } from "../redux/auth/authSlice";
+import { authService } from "../services/authService";
+import { GoogleLogin } from "@react-oauth/google";
+import { toast } from "react-hot-toast";
+import { LoadingButton } from "./../components/common/Loading";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-  const [loginError, setLoginError] = useState('');
-  const { loading: isLoading, error: authError } = useSelector((state) => state.auth); // แก้ไขการ destructuring
+  const [loginError, setLoginError] = useState("");
+  const { loading: isLoading, error: authError } = useSelector(
+    (state) => state.auth
+  ); // แก้ไขการ destructuring
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
     // Clear error when user starts typing
-    if (loginError) setLoginError('');
+    if (loginError) setLoginError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoginError(''); // Clear any previous errors
+    setLoginError(""); // Clear any previous errors
 
     try {
-      dispatch(authStart());
+        dispatch(authStart());
 
-      const response = await authService.login(formData);
+        const response = await authService.login(formData);
 
-      if (response?.user) {
-        dispatch(authSuccess(response.user));
-<<<<<<< HEAD
-<<<<<<< HEAD
-        toast.success("Login successful!");
+        if (response?.user) {
+            dispatch(authSuccess(response.user));
+            toast.success("Login successful!");
 
-        // Redirect to the page the user tried to visit or default to home
-        const from = location.state?.from?.pathname || "/";
-        navigate(from, { replace: true });
-      }
+            // Redirect to the page the user tried to visit or default to home
+            const from = location.state?.from?.pathname || "/";
+            navigate(from, { replace: true });
+        }
 
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Full Response Object:", JSON.stringify(response, null, 2));
-      }
+        if (process.env.NODE_ENV !== "production") {
+            console.log("Full Response Object:", JSON.stringify(response, null, 2));
+        }
     } catch (error) {
-      console.error("Login Error Details:", {
-        name: error.name,
-        message: error.message,
-        response: error.response,
-        config: error.config,
-      });
+        console.error("Login Error Details:", {
+            name: error.name,
+            message: error.message,
+            response: error.response,
+            config: error.config,
+        });
 
-      dispatch(authFailure(error.message));
-      setLoginError(error.message || "Login failed");
-      toast.error(error.message || "Login failed");
+        dispatch(authFailure(error.message));
+        setLoginError(error.message || "Login failed");
+        toast.error(error.message || "Login failed");
     }
-  };
+};
+
 
   const handleGoogleSuccess = useCallback(
     async (credentialResponse) => {
       try {
         dispatch(authStart());
-        console.log("Google login attempt with credential:", credentialResponse);
-  
-        const response = await authService.googleLogin(credentialResponse.credential);
+        console.log(
+          "Google login attempt with credential:",
+          credentialResponse
+        );
+
+        const response = await authService.googleLogin(
+          credentialResponse.credential
+        );
         console.log("Login response:", response);
-  
-        // ตรวจสอบว่า response มี message และ user หรือไม่
-        if (response?.message === "Google login successful" && response?.user) {
-          if (response?.token) {
+
+        if (response.message === "Google login successful" && response.user) {
+          if (response.token) {
             localStorage.setItem("token", response.token);
           }
-  
+
           dispatch(authSuccess(response.user));
           toast.success("Successfully logged in with Google");
-  
+
           const from = location.state?.from?.pathname || "/";
           navigate(from, { replace: true });
-        } else {
-          throw new Error("Invalid login response from server");
         }
       } catch (error) {
         console.error("Google login error:", error);
@@ -97,61 +100,6 @@ const Login = () => {
     },
     [dispatch, navigate, location.state]
   );
-  
-  
-=======
-        toast.success('Login successful!');
-
-        // Redirect to the page user tried to visit or default to home
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      }
-=======
-        toast.success('Login successful!');
-
-        // Redirect to the page user tried to visit or default to home
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      }
->>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
-      console.log('Successful Login Result:', response);
-    } catch (error) {
-      console.error('Detailed Login Error:', error);
-      dispatch(authFailure(error.message));
-      setLoginError(error.message || 'Login failed');
-      toast.error(error.message || 'Login failed');
-    }
-  };
-
-  const handleGoogleSuccess = useCallback(async (credentialResponse) => {
-    try {
-      dispatch(authStart());
-      console.log('Google login attempt with credential:', credentialResponse);
-
-      const response = await authService.googleLogin(credentialResponse.credential);
-      console.log('Login response:', response);
-
-      if (response.message === 'Google login successful' && response.user) {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-
-        dispatch(authSuccess(response.user));
-        toast.success('Successfully logged in with Google');
-
-        const from = location.state?.from?.pathname || '/';
-        navigate(from, { replace: true });
-      }
-    } catch (error) {
-      console.error('Google login error:', error);
-      dispatch(authFailure(error.message));
-      toast.error(error.message || 'Failed to login with Google');
-    }
-  }, [dispatch, navigate, location.state]);
-<<<<<<< HEAD
->>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
-=======
->>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
@@ -171,7 +119,9 @@ const Login = () => {
 
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
               <input
                 id="email"
                 name="email"
@@ -184,7 +134,9 @@ const Login = () => {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
               <input
                 id="password"
                 name="password"
@@ -209,7 +161,10 @@ const Login = () => {
           </div>
 
           <div className="text-sm text-center">
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link
+              to="/register"
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
               Don't have an account? Register
             </Link>
           </div>
@@ -230,7 +185,7 @@ const Login = () => {
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={() => {
-              toast.error('Google login failed');
+              toast.error("Google login failed");
             }}
           />
         </div>
