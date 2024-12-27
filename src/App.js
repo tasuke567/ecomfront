@@ -1,45 +1,51 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/common/Navbar';
-import Orders from './pages/Orders';
-import ProductDetail from './pages/ProductDetail'
-import PrivateRoute from './components/common/PrivateRoute';
-import { GoogleOAuthProvider } from '@react-oauth/google';
-import { Toaster } from 'react-hot-toast';
-import { setUser, setLoading } from './redux/auth/authSlice';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Navbar from "./components/common/Navbar";
+import Orders from "./pages/Orders";
+import ProductDetail from "./pages/ProductDetail";
+import PrivateRoute from "./components/common/PrivateRoute";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Toaster } from "react-hot-toast";
+import { setUser, setLoading } from "./redux/auth/authSlice";
+import { logout } from "./redux/auth/authSlice";
 
-import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
 // แก้ไข path การ import
-import { authService } from './services/authService';
+import { authService } from "./services/authService";
 
 // Components
 
-import Footer from './components/common/Footer';
+import Footer from "./components/common/Footer";
 
 // Pages
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Profile from './pages/Profile';
-import Login from './pages/Login';
-import Register from './pages/Register';
-
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   const dispatch = useDispatch();
-
+  // UseEffect to initialize auth (e.g., check if the token is valid)
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (token) {
         try {
           dispatch(setLoading(true));
           const userData = await authService.verifyToken(token);
           dispatch(setUser(userData));
         } catch (error) {
-          console.error('Token verification failed:', error);
-          localStorage.removeItem('token');
+          console.error("Token verification failed:", error);
+          localStorage.removeItem("token");
+          dispatch(logout()); // Clear the user data from Redux if the token is invalid
         } finally {
           dispatch(setLoading(false));
         }
@@ -48,9 +54,8 @@ function App() {
 
     initAuth();
   }, [dispatch]);
-  
-  return (
 
+  return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <Router>
         <Navbar />
@@ -77,21 +82,21 @@ function App() {
         toastOptions={{
           duration: 2000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: "#363636",
+            color: "#fff",
           },
           success: {
             duration: 2000,
             iconTheme: {
-              primary: '#4ade80',
-              secondary: '#fff',
+              primary: "#4ade80",
+              secondary: "#fff",
             },
           },
           error: {
             duration: 2000,
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
+              primary: "#ef4444",
+              secondary: "#fff",
             },
           },
         }}

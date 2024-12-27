@@ -29,30 +29,36 @@ export const authService = {
   login: async (credentials) => {
     try {
       validateCredentials(credentials);
-
+  
       const response = await api.post(ENDPOINTS.LOGIN, {
         email: credentials.email.toLowerCase().trim(),
         password: credentials.password,
       });
-
-      const data = validateResponse(response);
-
+  
+      // Check if response.data is valid before destructuring
+      const { message, user, token } = response.data || {};
+  
+      if (!user || !token) {
+        throw new Error("Invalid response: Missing user or token.");
+      }
+  
       // Normalize user data
       const normalizedUser = {
-        id: data.user.id || data.user._id,
-        username: data.user.username,
-        email: data.user.email,
-        role: data.user.role,
+        id: user.id || user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
       };
-
+  
       // Store session
-      authService.setSession({ user: normalizedUser, token: data.token });
-
-      return { user: normalizedUser, token: data.token };
+      authService.setSession({ user: normalizedUser, token });
+  
+      return { user: normalizedUser, token };
     } catch (error) {
       handleApiError(error, "Login failed");
     }
   },
+  
 
   googleLogin: async (credential) => {
     try {
@@ -72,14 +78,21 @@ export const authService = {
     try {
       const token = authService.getToken();
       if (!token) return null;
-
-      const response = await api.get(ENDPOINTS.VERIFY_TOKEN);
+  
+      // Add the token to the Authorization header
+      const response = await api.get(ENDPOINTS.VERIFY_TOKEN, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
       return validateResponse(response).user;
     } catch (error) {
       authService.clearSession();
       handleApiError(error, "Token verification failed");
     }
   },
+  
 
   updateProfile: async (userData) => {
     try {
@@ -181,7 +194,7 @@ const formatUserResponse = (data) => {
 
 const createFormData = (userData) => {
   const formData = new FormData();
-  
+
   if (userData.avatar instanceof File) {
     formData.append("avatar", userData.avatar);
   }
@@ -196,29 +209,20 @@ const createFormData = (userData) => {
 };
 
 const handleApiError = (error, defaultMessage) => {
-  const isNetworkError = !error.response;
-
   console.error("API Error Details:", {
-    name: error.name,
-    message: error.message,
-    response: error.response?.data || "No response data",
-    status: error.response?.status || "No status",
+      name: error.name,
+      message: error.message,
+      response: error.response?.data || "No response data",
+      status: error.response?.status || "No status",
   });
 
-  if (isNetworkError) {
-    throw new Error("Network error: Unable to reach the server");
+  if (!error.response) {
+      throw new Error("Network error: Unable to reach the server");
   }
 
-  if (error.response?.status === 401) {
-    authService.clearSession();
-    throw new Error("Unauthorized: Invalid credentials");
-  }
-
-  if (error.response?.data?.message) {
-    throw new Error(error.response.data.message);
-  }
-
-  throw new Error(defaultMessage);
+  const serverMessage = error.response.data?.message;
+  throw new Error(serverMessage || defaultMessage);
 };
+
 
 export default authService;

@@ -1,15 +1,17 @@
-// src/services/api.js
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
+// สร้าง instance ของ axios
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: process.env.REACT_APP_API_URL, // URL ของ API Server
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+    Accept: 'application/json',
+  },
+  timeout: 10000, // Timeout 10 วินาที
 });
 
-// Token management
+// ฟังก์ชันจัดการ Token
 const tokenMethods = {
   setToken: (token) => {
     if (token) {
@@ -17,39 +19,33 @@ const tokenMethods = {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   },
-  
-  getToken: () => {
-    return localStorage.getItem('token');
-  },
-  
+  getToken: () => localStorage.getItem('token'),
   clearToken: () => {
     localStorage.removeItem('token');
     delete api.defaults.headers.common['Authorization'];
   },
-
-  // Initialize token from localStorage on app start
   initializeToken: () => {
     const token = localStorage.getItem('token');
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
-  }
+  },
 };
 
-// Request interceptor
+// Interceptor สำหรับ Request
 api.interceptors.request.use(
   (config) => {
-    // Check for token on each request
     const token = tokenMethods.getToken();
     if (token && !config.headers['Authorization']) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-
-    console.log('API Request:', {
-      url: config.url,
-      method: config.method,
-      data: config.data
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Request:', {
+        url: config.url,
+        method: config.method,
+        data: config.data,
+      });
+    }
     return config;
   },
   (error) => {
@@ -58,60 +54,52 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Interceptor สำหรับ Response
 api.interceptors.response.use(
   (response) => {
-    console.log('API Response:', {
-      url: response.config.url,
-      method: response.config.method,
-      status: response.status,
-      data: response.data
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API Response:', {
+        url: response.config.url,
+        method: response.config.method,
+        status: response.status,
+        data: response.data,
+      });
+    }
     return response;
   },
   (error) => {
-    // Handle different types of errors
-    const errorResponse = {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data
-    };
-
-    console.error('API Error:', errorResponse);
-
-    // Handle authentication errors
-    if (error.response?.status === 401) {
-      tokenMethods.clearToken();
-      // Optionally dispatch a logout action or redirect
-      window.location.href = '/login';
-    }
-
-    // Handle network errors
     if (!error.response) {
       error.response = {
         data: {
-          message: 'Network error. Please check your connection.'
-        }
+          message: 'Network error. Please check your connection.',
+        },
       };
-    }
-
-    // Handle timeout
-    if (error.code === 'ECONNABORTED') {
+      error.type = 'network';
+    } else if (error.code === 'ECONNABORTED') {
       error.response = {
         data: {
-          message: 'Request timed out. Please try again.'
-        }
+          message: 'Request timed out. Please try again.',
+        },
       };
+      error.type = 'timeout';
+    } else {
+      error.type = 'server';
     }
 
+    if (error.response?.status === 401) {
+      toast.error("Your session has expired. Please log in again.");
+      tokenMethods.clearToken();
+      window.location.href = '/login';
+    }
+
+    console.error('API Error:', error.response);
+    toast.error(error.response?.data?.message || "Something went wrong.");
     return Promise.reject(error);
   }
 );
 
-// Add utility methods for common API operations
+// Utility Methods สำหรับเรียก API
 const apiMethods = {
-  // GET request with error handling
   async get(url, config = {}) {
     try {
       const response = await api.get(url, config);
@@ -120,8 +108,6 @@ const apiMethods = {
       throw error;
     }
   },
-
-  // POST request with error handling
   async post(url, data = {}, config = {}) {
     try {
       const response = await api.post(url, data, config);
@@ -130,8 +116,6 @@ const apiMethods = {
       throw error;
     }
   },
-
-  // PUT request with error handling
   async put(url, data = {}, config = {}) {
     try {
       const response = await api.put(url, data, config);
@@ -140,8 +124,6 @@ const apiMethods = {
       throw error;
     }
   },
-
-  // DELETE request with error handling
   async delete(url, config = {}) {
     try {
       const response = await api.delete(url, config);
@@ -149,17 +131,17 @@ const apiMethods = {
     } catch (error) {
       throw error;
     }
-  }
+  },
 };
 
-// Combine all methods
+// รวม Method ทั้งหมด
 const enhancedApi = {
   ...api,
   ...tokenMethods,
-  ...apiMethods
+  ...apiMethods,
 };
 
-// Initialize token on import
+// เรียกใช้ initializeToken เมื่อไฟล์นี้ถูกโหลด
 enhancedApi.initializeToken();
 
 export default enhancedApi;

@@ -36,59 +36,50 @@ const Login = () => {
     setLoginError(""); // Clear any previous errors
 
     try {
-        dispatch(authStart());
+      dispatch(authStart());
 
-        const response = await authService.login(formData);
+      const response = await authService.login(formData);
 
-        if (response?.user) {
-            dispatch(authSuccess(response.user));
-            toast.success("Login successful!");
+      if (response?.user) {
+        dispatch(authSuccess(response.user));
+        toast.success("Login successful!");
 
-            // Redirect to the page the user tried to visit or default to home
-            const from = location.state?.from?.pathname || "/";
-            navigate(from, { replace: true });
-        }
+        // Redirect to the page the user tried to visit or default to home
+        const from = location.state?.from?.pathname || "/";
+        navigate(from, { replace: true });
+      }
 
-        if (process.env.NODE_ENV !== "production") {
-            console.log("Full Response Object:", JSON.stringify(response, null, 2));
-        }
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Full Response Object:", JSON.stringify(response, null, 2));
+      }
     } catch (error) {
-        console.error("Login Error Details:", {
-            name: error.name,
-            message: error.message,
-            response: error.response,
-            config: error.config,
-        });
+      console.error("Login Error Details:", {
+        name: error.name,
+        message: error.message,
+        response: error.response,
+        config: error.config,
+      });
 
-        dispatch(authFailure(error.message));
-        setLoginError(error.message || "Login failed");
-        toast.error(error.message || "Login failed");
+      dispatch(authFailure(error.message));
+      setLoginError(error.message || "Login failed");
+      toast.error(error.message || "Login failed");
     }
-};
-
+  };
 
   const handleGoogleSuccess = useCallback(
     async (credentialResponse) => {
       try {
         dispatch(authStart());
-        console.log(
-          "Google login attempt with credential:",
-          credentialResponse
-        );
-
-        const response = await authService.googleLogin(
-          credentialResponse.credential
-        );
-        console.log("Login response:", response);
-
+        const response = await authService.googleLogin(credentialResponse.credential);
+        
         if (response.message === "Google login successful" && response.user) {
           if (response.token) {
             localStorage.setItem("token", response.token);
           }
-
+  
           dispatch(authSuccess(response.user));
           toast.success("Successfully logged in with Google");
-
+  
           const from = location.state?.from?.pathname || "/";
           navigate(from, { replace: true });
         }
@@ -100,6 +91,7 @@ const Login = () => {
     },
     [dispatch, navigate, location.state]
   );
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
