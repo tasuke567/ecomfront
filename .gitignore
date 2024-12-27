@@ -22,13 +22,3 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-# Ignore test directories
-/test/
-/__tests__/
-
-# Ignore all test files with certain extensions (e.g., .test.js, .spec.js)
-*.test.js
-*.spec.js
-
-# Ignore coverage reports
-/coverage/

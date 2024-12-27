@@ -1,41 +1,53 @@
-// src/services/tokenService.js
-
-const TOKEN_KEY = "token";
-const REFRESH_TOKEN_KEY = "refreshToken";
+import { authService } from './authService';
+import api from './api';
 
 export const tokenService = {
-  // Core token methods
-  set(token) {
-    if (token) {
-      localStorage.setItem(TOKEN_KEY, token);
+  refreshTokenPromise: null,
+
+  async refreshToken() {
+    try {
+      if (this.refreshTokenPromise) {
+        return this.refreshTokenPromise;
+      }
+
+      this.refreshTokenPromise = api.post('/auth/refresh-token', {
+        refreshToken: localStorage.getItem('refreshToken')
+      });
+
+      const { data } = await this.refreshTokenPromise;
+      authService.setSession(data);
+
+      this.refreshTokenPromise = null;
+      return data;
+    } catch (error) {
+      this.refreshTokenPromise = null;
+      throw error;
     }
   },
 
-  get() {
-    return localStorage.getItem(TOKEN_KEY);
-  },
+  setupTokenRefresh() {
+    // Intercept 401 errors
+    api.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
 
-  remove() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-  },
+        if (error.response?.status === 401 && !originalRequest._retry) {
+          originalRequest._retry = true;
 
-  has() {
-    return Boolean(this.get());
-  },
+          try {
+            await this.refreshToken();
+            // Retry original request with new token
+            return api(originalRequest);
+          } catch (refreshError) {
+            // Refresh token failed, logout user
+            authService.logout();
+            return Promise.reject(refreshError);
+          }
+        }
 
-  // Refresh token methods
-  setRefreshToken(token) {
-    if (token) {
-      localStorage.setItem(REFRESH_TOKEN_KEY, token);
-    }
-  },
-
-  getRefreshToken() {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
-  },
-
-  clear() {
-    this.remove();
-  },
+        return Promise.reject(error);
+      }
+    );
+  }
 };
