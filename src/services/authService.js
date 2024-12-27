@@ -1,229 +1,224 @@
-import api from './api';
+import api from "./api";
+
+const ENDPOINTS = {
+  LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
+  GOOGLE_LOGIN: "/auth/google",
+  VERIFY_TOKEN: "/auth/verify",
+  UPDATE_PROFILE: "/api/user/profile",
+};
 
 export const authService = {
   register: async (userData) => {
     try {
-      console.log('Starting registration with data:', userData);
+      validateRegistration(userData);
 
-      // Client-side validation
-      if (!userData.username?.trim()) {
-        throw new Error('Username is required');
-      }
-
-      if (!userData.email?.trim()) {
-        throw new Error('Email is required');
-      }
-
-      if (!userData.password) {
-        throw new Error('Password is required');
-      }
-
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(userData.email)) {
-        throw new Error('Invalid email format');
-      }
-
-      // Username validation
-      const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
-      if (!usernameRegex.test(userData.username)) {
-        throw new Error('Username must be 3-20 characters long and can only contain letters, numbers, and underscores');
-      }
-
-      // Password validation
-      if (userData.password.length < 6) {
-        throw new Error('Password must be at least 6 characters long');
-      }
-
-      const response = await api.post('/auth/register', {
+      const response = await api.post(ENDPOINTS.REGISTER, {
         username: userData.username.trim(),
         email: userData.email.toLowerCase().trim(),
-        password: userData.password
+        password: userData.password,
       });
 
-      const data = response.data;
-      console.log('Registration response:', data);
-
-      if (!data || !data.user) {
-        throw new Error('Invalid response format');
-      }
-
-      return {
-        user: {
-          id: data.user.id || data.user._id,
-          username: data.user.username,
-          email: data.user.email,
-          role: data.user.role
-        },
-        message: data.message
-      };
+      const data = validateResponse(response);
+      return formatUserResponse(data);
     } catch (error) {
-      authService.handleError(error, 'Registration failed');
+      handleApiError(error, "Registration failed");
     }
   },
 
   login: async (credentials) => {
     try {
-      console.log('Login credentials:', {
+      validateCredentials(credentials);
+
+      const response = await api.post(ENDPOINTS.LOGIN, {
         email: credentials.email.toLowerCase().trim(),
-        // Don't log password for security
+        password: credentials.password,
       });
-  
-      const response = await api.post('/auth/login', {
-        email: credentials.email.toLowerCase().trim(),
-        password: credentials.password
-      });
-  
-      // Add more detailed logging
-      console.log('Full API Response:', response);
-      console.log('Response Status:', response.status);
-      console.log('Response Data:', response.data);
-  
-      // More robust response checking
-      if (!response || !response.data) {
-        throw new Error('No response received from server');
-      }
-  
-      const data = response.data;
-  
-      if (!data.user || !data.token) {
-        console.error('Invalid response structure:', data);
-        throw new Error('Invalid response format: Missing user or token');
-      }
-  
-      authService.setSession(data);
-  
-      return {
-        user: {
-          id: data.user.id || data.user._id,
-          username: data.user.username,
-          email: data.user.email,
-          role: data.user.role
-        },
-        token: data.token
+
+      const data = validateResponse(response);
+
+      // Normalize user data
+      const normalizedUser = {
+        id: data.user.id || data.user._id,
+        username: data.user.username,
+        email: data.user.email,
+        role: data.user.role,
       };
+
+      // Store session
+      authService.setSession({ user: normalizedUser, token: data.token });
+
+      return { user: normalizedUser, token: data.token };
     } catch (error) {
-      // More detailed error logging
-      console.error('Login Error Details:', {
-        name: error.name,
-        message: error.message,
-        response: error.response,
-        config: error.config
-      });
-  
-      authService.handleError(error, 'Login failed');
+      handleApiError(error, "Login failed");
     }
   },
 
   googleLogin: async (credential) => {
     try {
-      if (!credential) {
-        throw new Error('No credential provided');
-      }
+      if (!credential) throw new Error("No credential provided");
 
-      const response = await api.post('/auth/google', { credential });
-      const data = response.data;
+      const response = await api.post(ENDPOINTS.GOOGLE_LOGIN, { credential });
+      const data = validateResponse(response);
 
-      if (!data || !data.user) {
-        throw new Error('Invalid response format');
-      }
-
-      this.setSession(data);
-
-      return {
-        user: data.user,
-        token: data.token
-      };
+      authService.setSession(data);
+      return formatUserResponse(data);
     } catch (error) {
-      this.handleError(error, 'Google login failed');
+      handleApiError(error, "Google login failed");
     }
-  },
-
-  setSession: (data) => {
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-      api.setToken(data.token);
-    }
-  },
-
-  clearSession: () => {
-    localStorage.removeItem('token');
-    api.clearToken();
-  },
-
-  logout: () => {
-    authService.clearSession();
-  },
-
-  isAuthenticated: () => {
-    return !!localStorage.getItem('token');
   },
 
   verifyToken: async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = authService.getToken();
       if (!token) return null;
 
-      const response = await api.get('/auth/verify');
-      return response.data.user;
+      const response = await api.get(ENDPOINTS.VERIFY_TOKEN);
+      return validateResponse(response).user;
     } catch (error) {
       authService.clearSession();
-      throw error;
+      handleApiError(error, "Token verification failed");
     }
   },
 
   updateProfile: async (userData) => {
     try {
-      const formData = userData.avatar instanceof File 
-        ? this.createFormData(userData)
-        : userData;
+      const formData = createFormData(userData);
+      const headers =
+        formData instanceof FormData
+          ? { "Content-Type": "multipart/form-data" }
+          : { "Content-Type": "application/json" };
 
-      const response = await api.put('/api/user/profile', formData, {
-        headers: {
-          'Content-Type': userData.avatar instanceof File 
-            ? 'multipart/form-data' 
-            : 'application/json',
-        },
+      const response = await api.put(ENDPOINTS.UPDATE_PROFILE, formData, {
+        headers,
       });
-      
-      return response.data;
+      return validateResponse(response);
     } catch (error) {
-      this.handleError(error, 'Profile update failed');
+      handleApiError(error, "Profile update failed");
     }
   },
 
-  // Helper methods
-  createFormData: (userData) => {
-    const formData = new FormData();
-    formData.append('avatar', userData.avatar);
-    
-    Object.keys(userData).forEach(key => {
-      if (key !== 'avatar') {
-        formData.append(key, userData[key]);
-      }
-    });
-
-    return formData;
+  setSession: (data) => {
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      api.setToken(data.token);
+    }
   },
 
-  handleError: (error, defaultMessage) => {
-    console.error('API Error:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    });
+  clearSession: () => {
+    localStorage.removeItem("token");
+    api.clearToken();
+  },
 
-    if (error.response?.status === 401) {
-      authService.clearSession();
-      throw new Error('Session expired. Please login again.');
+  logout: (redirect = true) => {
+    authService.clearSession();
+    if (redirect) {
+      window.location.href = "/login"; // Adjust as necessary for SPA navigation
     }
+  },
 
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
+  isAuthenticated: () => !!localStorage.getItem("token"),
 
-    throw new Error(defaultMessage);
+  getToken: () => localStorage.getItem("token"),
+};
+
+// Helper Functions
+const validateRegistration = (userData) => {
+  const { username, email, password } = userData;
+
+  if (!username?.trim()) throw new Error("Username is required");
+  if (!email?.trim()) throw new Error("Email is required");
+  if (!password) throw new Error("Password is required");
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    throw new Error("Invalid email format");
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username))
+    throw new Error(
+      "Username must be 3-20 characters long and can only contain letters, numbers, and underscores"
+    );
+  if (password.length < 6)
+    throw new Error("Password must be at least 6 characters long");
+};
+
+const validateCredentials = (credentials) => {
+  const { email, password } = credentials;
+
+  if (!email?.trim()) throw new Error("Email is required");
+  if (!password) throw new Error("Password is required");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    throw new Error("Invalid email format");
+};
+
+const validateResponse = (response) => {
+  if (!response || !response.data) {
+    throw new Error("No response received from the server");
   }
+
+  const data = response.data;
+
+  if (!data.user || !data.token) {
+    throw new Error("Invalid response structure: Missing required fields");
+  }
+
+  return data;
+};
+
+const formatUserResponse = (data) => {
+  const { user, token } = data;
+
+  if (!user || !token)
+    throw new Error("Invalid response format: Missing user or token");
+
+  const { id, username, email, role } = user;
+
+  if (!id && !user._id) throw new Error("Invalid response: Missing user ID");
+
+  return {
+    user: { id: id || user._id, username, email, role },
+    token,
+  };
+};
+
+const createFormData = (userData) => {
+  const formData = new FormData();
+  
+  if (userData.avatar instanceof File) {
+    formData.append("avatar", userData.avatar);
+  }
+
+  Object.keys(userData).forEach((key) => {
+    if (key !== "avatar") {
+      formData.append(key, userData[key]);
+    }
+  });
+
+  return formData;
+};
+
+const handleApiError = (error, defaultMessage) => {
+  const isNetworkError = !error.response;
+
+  console.error("API Error Details:", {
+    name: error.name,
+    message: error.message,
+    response: error.response?.data || "No response data",
+    status: error.response?.status || "No status",
+  });
+
+  if (isNetworkError) {
+    throw new Error("Network error: Unable to reach the server");
+  }
+
+  if (error.response?.status === 401) {
+    authService.clearSession();
+    throw new Error("Unauthorized: Invalid credentials");
+  }
+
+  if (error.response?.data?.message) {
+    throw new Error(error.response.data.message);
+  }
+
+  throw new Error(defaultMessage);
 };
 
 export default authService;
