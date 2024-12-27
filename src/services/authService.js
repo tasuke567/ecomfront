@@ -117,6 +117,8 @@ export const authService = {
 
   googleLogin: async (credential) => {
     try {
+<<<<<<< HEAD
+<<<<<<< HEAD
       if (!credential) throw new Error("No credential provided");
   
       const response = await api.post(ENDPOINTS.GOOGLE_LOGIN, { credential });
@@ -169,6 +171,48 @@ export const authService = {
       return validateResponse(response);
     } catch (error) {
       handleApiError(error, "Profile update failed");
+=======
+      if (!credential) {
+        throw new Error('No credential provided');
+      }
+
+      const response = await api.post('/auth/google', { credential });
+      const data = response.data;
+
+      if (!data || !data.user) {
+        throw new Error('Invalid response format');
+      }
+
+      this.setSession(data);
+
+      return {
+        user: data.user,
+        token: data.token
+      };
+    } catch (error) {
+      this.handleError(error, 'Google login failed');
+>>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
+=======
+      if (!credential) {
+        throw new Error('No credential provided');
+      }
+
+      const response = await api.post('/auth/google', { credential });
+      const data = response.data;
+
+      if (!data || !data.user) {
+        throw new Error('Invalid response format');
+      }
+
+      this.setSession(data);
+
+      return {
+        user: data.user,
+        token: data.token
+      };
+    } catch (error) {
+      this.handleError(error, 'Google login failed');
+>>>>>>> parent of d8916c2 (Enhance testing and configuration for Jest in the project. Updated .gitignore to exclude test directories and coverage reports. Improved craco.config.js with comprehensive Jest configuration, including coverage thresholds, test match patterns, and custom render methods for testing with Redux. Refactored setupTests.js to include additional testing utilities and mock implementations. Removed unused App.js and App.test.js files to streamline the codebase.)
     }
   },
 
